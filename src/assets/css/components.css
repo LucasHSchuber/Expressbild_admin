@@ -1,0 +1,54 @@
+/* COMPONENTS */
+
+/* New post button */
+.newpost {
+  position: fixed;
+  bottom: 2em;
+  right: 2em;
+  padding: 1em;
+  background-color: #373737;
+  border-radius: 50%;
+  transition: 0.1s;
+  border: 1px solid #373737;
+  z-index: 2;
+  box-shadow: 0px 0px 10px 1px rgb(135, 135, 135);
+  cursor: pointer !important;
+}
+.newpost:hover {
+  background-color: rgb(76, 76, 76);
+  border: 1px solid rgb(97, 97, 97);
+  box-shadow: 0px 0px 10px 1px rgb(135, 135, 135, 0);
+}
+.newpost-button {
+  background-color: inherit;
+  border: none;
+  color: white;
+  outline: none;
+  cursor: pointer !important;
+}
+.newpost-button:active,
+.newpost-button:focus {
+  outline: none;
+}
+
+/* New post modal */
+/* src/components/PostModal.css */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.modal-content {
+  background: white;
+  padding: 3em 3em;
+  border-radius: 8px;
+  width: 35em;
+}

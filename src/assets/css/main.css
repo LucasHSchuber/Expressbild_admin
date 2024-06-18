@@ -1,0 +1,67 @@
+/* MAIN CSS */
+
+/* wrapper */
+.page-wrapper {
+  padding: 8em 5em 10em 5em;
+}
+
+/* form */
+.form-input {
+  border-radius: 3px;
+  border: 0.5px solid rgb(154, 154, 154);
+  height: 2.2em;
+  outline: none;
+  padding-left: 0.5em;
+  font-size: 0.9em;
+  width: 100%;
+}
+.form-input:focus {
+  border: 0.5px solid rgb(0, 0, 0);
+}
+.form-textarea {
+  border-radius: 3px;
+  border: 0.5px solid rgb(154, 154, 154);
+  height: 8em;
+  outline: none;
+  padding-left: 0.5em;
+  font-size: 0.9em;
+  width: 100%;
+}
+.form-textarea:focus {
+  border: 0.5px solid rgb(0, 0, 0);
+}
+.form-select {
+    border-radius: 3px;
+  border: 0.5px solid rgb(154, 154, 154);
+  height: 2.2em;
+  width: 10em;
+  outline: none;
+  padding-left: 0.2em;
+  font-size: 0.9em;
+}
+
+/* INDEX */
+
+/* PUBLISHEDNEWS */
+.table {
+  font-size: 0.8em !important;
+}
+.tr-tbody:hover {
+  background-color: rgb(239, 239, 239);
+  cursor: pointer;
+}
+.delete-table {
+  color: red;
+  transition: 0.2s;
+}
+.delete-table:hover {
+  color: black;
+}
+
+/* NEWSDETAILS */
+.left-box {
+  width: 50%;
+}
+.left-box p {
+  font-size: 0.9em;
+}

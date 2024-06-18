@@ -1,0 +1,27 @@
+/* HEADER CSS */
+
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding: 1.5em 3em 1em 3em;
+  background-color: rgb(242, 242, 242);
+  width: 100%;
+}
+
+.nav-list li {
+  list-style-type: none;
+}
+
+.navlink {
+  color: black;
+  padding-right: 5em;
+  list-style-type: none;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+.navlink:hover {
+  color: rgb(85, 85, 85);
+  text-decoration: none;
+}
