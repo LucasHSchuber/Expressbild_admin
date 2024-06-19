@@ -26,6 +26,10 @@ const Index = () => {
           }
         );
         console.log('Fetched news:', response.data.result);
+        if (response.data.error) {
+          console.error('API Error:', response.data.error);
+          return;
+        }
         setNews(response.data.result);
       } catch (error) {
         console.error('Error fetching news:', error);
@@ -82,9 +86,9 @@ const Index = () => {
     setShowModal(false);
   };
 
-//   const handleSubmitPost = (post) => {
-//     console.log('Post submitted:', post);
-//   };
+  //   const handleSubmitPost = (post) => {
+  //     console.log('Post submitted:', post);
+  //   };
 
   return (
     <div className="page-wrapper">
@@ -103,10 +107,7 @@ const Index = () => {
       )} */}
 
       <Newpostbutton onClick={handleOpenModal} />
-      <Newpostmodal
-        show={showModal}
-        handleClose={handleCloseModal}
-      />
+      <Newpostmodal show={showModal} handleClose={handleCloseModal} />
     </div>
   );
 };

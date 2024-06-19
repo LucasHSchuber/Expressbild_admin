@@ -5,23 +5,71 @@ import React, { useEffect, useState } from 'react';
 
 import '../assets/css/components.css';
 
-const Editpostmodal = ({ show, handleClose, handleSubmit, item }) => {
+const Editpostmodal = ({
+  show,
+  handleClose,
+  handleSubmit,
+  item,
+  refreshData,
+}) => {
   if (!show) return null;
 
-  const submitForm = (event) => {
-    event.preventDefault();
-    const formData = new FormData(event.target);
-    const post = {
-      title: formData.get('title'),
-      content: formData.get('content'),
-      language: formData.get('language'),
-      categories: formData.getAll('categories'),
-    };
-    handleSubmit(post);
-    handleClose();
+  const [title, setTitle] = useState(item.news.title);
+  const [content, setContent] = useState(item.news.content);
+  const [selectedLanguages, setSelectedLanguages] = useState([]);
+
+  useEffect(() => {
+    setTitle(item.news.title);
+    setContent(item.news.content);
+    const initialLanguages = Array.isArray(item.news.lang)
+      ? item.news.lang
+      : typeof item.news.lang === 'string'
+        ? item.news.lang.split(',')
+        : [];
+    setSelectedLanguages(initialLanguages);
+  }, [item]);
+
+  const handleChangeTitle = (e) => setTitle(e.target.value);
+  const handleChangeContent = (e) => setContent(e.target.value);
+  const handleCheckboxChange = (e) => {
+    const value = e.target.value;
+    setSelectedLanguages((prevSelected) =>
+      prevSelected.includes(value)
+        ? prevSelected.filter((lang) => lang !== value)
+        : [...prevSelected, value]
+    );
   };
 
-  
+  const submitForm = async (event) => {
+    event.preventDefault();
+    const post = {
+      news_id: item.news.id,
+      title,
+      content,
+      lang: selectedLanguages.join(','),
+    };
+    // handleSubmit(post);
+
+    try {
+      const token = '666ab2a5be8ee1.66302861';
+      const id = item.news.id;
+      const response = await axios.put(
+        `/api/index.php/rest/photographer_portal/news/${id}`,
+        post,
+        {
+          headers: {
+            Authorization: `Admin ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      console.log('Update news response:', response);
+      refreshData();
+      handleClose();
+    } catch (error) {
+      console.error('Error updating news:', error);
+    }
+  };
 
   return (
     <div className="modal-overlay">
@@ -34,11 +82,12 @@ const Editpostmodal = ({ show, handleClose, handleSubmit, item }) => {
             </div>
             <div>
               <input
-                style={{ marginTop: '-0.5em'}}
+                style={{ marginTop: '-0.5em' }}
                 className="form-input"
                 type="text"
                 name="title"
-                defaultValue={item.title}
+                value={title}
+                onChange={handleChangeTitle}
                 required
               />
             </div>
@@ -52,12 +101,13 @@ const Editpostmodal = ({ show, handleClose, handleSubmit, item }) => {
                 style={{ marginTop: '-0.5em' }}
                 className="form-textarea"
                 name="content"
-                defaultValue={item.content}
+                value={content}
+                onChange={handleChangeContent}
                 required
               ></textarea>
             </div>
           </div>
-          <div>
+          {/* <div>
             <label className="mr-2">Publish to:</label>
             <select className="form-select" name="language" required>
               <option value="All">All countries</option>
@@ -67,6 +117,59 @@ const Editpostmodal = ({ show, handleClose, handleSubmit, item }) => {
               <option value="FI">Finland</option>
               <option value="SE">Sweden</option>
             </select>
+          </div> */}
+          <div>
+            <label>Publish to:</label>
+            <div>
+              <input
+                type="checkbox"
+                name="categories"
+                value="All"
+                checked={selectedLanguages.includes('All')}
+                onChange={handleCheckboxChange}
+              />{' '}
+              All
+              <input
+                type="checkbox"
+                name="categories"
+                value="DK"
+                checked={selectedLanguages.includes('DK')}
+                onChange={handleCheckboxChange}
+              />{' '}
+              Denmark
+              <input
+                type="checkbox"
+                name="categories"
+                value="DE"
+                checked={selectedLanguages.includes('DE')}
+                onChange={handleCheckboxChange}
+              />{' '}
+              Germany
+              <input
+                type="checkbox"
+                name="categories"
+                value="NO"
+                checked={selectedLanguages.includes('NO')}
+                onChange={handleCheckboxChange}
+              />{' '}
+              Norway
+              <input
+                type="checkbox"
+                name="categories"
+                value="FI"
+                checked={selectedLanguages.includes('FI')}
+                onChange={handleCheckboxChange}
+              />{' '}
+              Finland
+              <input
+                type="checkbox"
+                name="categories"
+                value="SE"
+                checked={selectedLanguages.includes('SE')}
+                onChange={handleCheckboxChange}
+              />{' '}
+              Sweden
+            </div>
           </div>
           <div className="mt-3">
             <button

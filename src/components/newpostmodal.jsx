@@ -5,27 +5,45 @@ import React, { useEffect, useState } from 'react';
 
 import '../assets/css/components.css';
 
-const Newpostmodal = ({ show, handleClose, handleSubmit }) => {
+const Newpostmodal = ({ show, handleClose, refreshData }) => {
   if (!show) return null;
 
   const submitForm = (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
+    const selectedCategories = formData.getAll('categories');
+    const lang = selectedCategories.join(',');
     const post = {
       title: formData.get('title'),
       content: formData.get('content'),
-      language: formData.get('language'),
-      categories: formData.getAll('categories'),
+      //   language: formData.get('language'),
+      lang: lang,
     };
     handleSubmitPost(post);
     handleClose();
   };
 
-  
-  const handleSubmitPost = (post) => {
+  const handleSubmitPost = async (post) => {
     console.log('Post submitted:', post);
+    const token = '666ab2a5be8ee1.66302861';
+    try {
+      const response = await axios.post(
+        '/api/index.php/rest/photographer_portal/news',
+        post,
+        {
+          headers: {
+            Authorization: `Admin ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      console.log('Post news response:', response);
+      refreshData();
+    } catch (error) {
+      console.error('Error posting news:', error);
+    }
   };
-  
+
   return (
     <div className="modal-overlay">
       <div className="modal-content">
@@ -72,12 +90,29 @@ const Newpostmodal = ({ show, handleClose, handleSubmit }) => {
           <div>
             <label>Publish to:</label>
             <div>
-              <input type="checkbox" name="categories" value="All" /> All
-              <input type="checkbox" name="categories" value="DK" /> Denmark
-              <input type="checkbox" name="categories" value="DE" /> Germany
-              <input type="checkbox" name="categories" value="NO" /> Norway
-              <input type="checkbox" name="categories" value="FI" /> Finland
-              <input type="checkbox" name="categories" value="SE" /> Sweden
+              <label>
+                <input type="checkbox" name="categories" value="All" /> All
+              </label>
+              <br />
+              <label>
+                <input type="checkbox" name="categories" value="DK" /> Denmark
+              </label>
+              <br />
+              <label>
+                <input type="checkbox" name="categories" value="DE" /> Germany
+              </label>
+              <br />
+              <label>
+                <input type="checkbox" name="categories" value="NO" /> Norway
+              </label>
+              <br />
+              <label>
+                <input type="checkbox" name="categories" value="FI" /> Finland
+              </label>
+              <br />
+              <label>
+                <input type="checkbox" name="categories" value="SE" /> Sweden
+              </label>
             </div>
           </div>
           <div className="mt-3">

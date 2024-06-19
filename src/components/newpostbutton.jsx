@@ -2,6 +2,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
+
 import '../assets/css/components.css';
 
 const Newpostbutton = ({ onClick }) => {
@@ -11,7 +14,7 @@ const Newpostbutton = ({ onClick }) => {
 
   return (
     <div className="newpost" onClick={onClick}>
-      <button className="newpost-button">+</button>
+      <button className="newpost-button"><FontAwesomeIcon icon={faPlus} /></button>
     </div>
   );
 };

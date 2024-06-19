@@ -25,11 +25,11 @@
   background-color: rgb(211, 211, 211);
   color: rgb(24, 24, 24);
 }
-.delete{
-    background-color: rgb(255, 69, 69);
-    color:white;
+.delete {
+  background-color: rgb(255, 69, 69);
+  color: white;
 }
-.edit{
-    background-color: rgb(255, 179, 0);
-    color:white;
+.edit {
+  background-color: rgb(255, 179, 0);
+  color: white;
 }
