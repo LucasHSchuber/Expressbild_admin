@@ -17,7 +17,3 @@ To get started with this project, follow the steps below:
 - Node.js (v12.x or later)
 - npm or yarn
 
-### Installation
-1. Clone the repository:
-   git clone https://github.com/yourusername/your-repo-name.git
-   cd your-repo-name
