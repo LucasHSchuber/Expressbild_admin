@@ -175,6 +175,17 @@ const Publishednews = () => {
     setShowModal(false);
   };
 
+  //delete confrim
+  const handleDeleteClick = (newsId) => {
+    const userConfirmed = window.confirm(
+      'Are you sure you want to delete this news item?'
+    );
+    if (userConfirmed) {
+      deleteNews(newsId);
+    }
+  };
+
+  //delete news from database
   const deleteNews = async (id) => {
     console.log('deleted news id:', id);
     const token = '666ab2a5be8ee1.66302861';
@@ -236,7 +247,7 @@ const Publishednews = () => {
         <tbody>
           {combinedNews && combinedNews.length > 0 ? (
             combinedNews
-              .slice() // Create a shallow copy to avoid mutating original array
+              .slice() 
               .sort((a, b) => {
                 // Sorting by created_at in descending order
                 const dateA = new Date(a.news.created_at);
@@ -252,7 +263,7 @@ const Publishednews = () => {
                   <td title={item.news.title}>{item.news.title}</td>
                   <td title={item.news.content}>
                     {item.news.content && item.news.content.length > 40
-                      ? item.news.content.substring(0, 40)
+                      ? item.news.content.substring(0, 40) + "..."
                       : item.news.content}
                   </td>
                   <td>
@@ -285,7 +296,7 @@ const Publishednews = () => {
                       icon={faTrashAlt}
                       onClick={(e) => {
                         e.stopPropagation();
-                        deleteNews(item.news.id);
+                        handleDeleteClick(item.news.id);
                       }}
                     />
                   </td>

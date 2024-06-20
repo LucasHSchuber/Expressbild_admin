@@ -3,26 +3,57 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
+
 import '../assets/css/components.css';
 
 const Newpostmodal = ({ show, handleClose, refreshData }) => {
+  //define states
+  const [selectedLanguages, setSelectedLanguages] = useState([]);
+  const [errorBoarderLang, setErrorBoarderLang] = useState(false);
+  const [errorBoarderContent, setErrorBoarderContent] = useState(false);
+  const [editorHtml, setEditorHtml] = useState('');
+
   if (!show) return null;
 
+  //handle change for ReactQuill text-editor
+  const handleChange = (html) => {
+    setEditorHtml(html);
+    setErrorBoarderContent(false);
+    console.log(editorHtml);
+  };
+
+//submit new post form
   const submitForm = (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
-    const selectedCategories = formData.getAll('categories');
+    const selectedCategories = formData
+      .getAll('categories')
+      .filter((category) => category !== 'All');
     const lang = selectedCategories.join(',');
-    const post = {
-      title: formData.get('title'),
-      content: formData.get('content'),
-      //   language: formData.get('language'),
-      lang: lang,
-    };
-    handleSubmitPost(post);
-    handleClose();
+    if(editorHtml === "" || editorHtml === "<p><br></p>"){
+        console.log("Missing content");
+        setErrorBoarderContent(true);
+        return;
+    }
+    if (lang === '') {
+      console.log('Choose at least one country');
+      setErrorBoarderLang(true);
+      return;
+    } else {
+      const post = {
+        title: formData.get('title'),
+        content: editorHtml,
+        //   language: formData.get('language'),
+        lang: lang,
+      };
+      handleSubmitPost(post);
+      handleClose();
+    }
   };
 
+  //submitting post
   const handleSubmitPost = async (post) => {
     console.log('Post submitted:', post);
     const token = '666ab2a5be8ee1.66302861';
@@ -39,8 +70,33 @@ const Newpostmodal = ({ show, handleClose, refreshData }) => {
       );
       console.log('Post news response:', response);
       refreshData();
+      setSelectedLanguages([]);
+      setEditorHtml("");
     } catch (error) {
       console.error('Error posting news:', error);
+    }
+  };
+
+  //handle checkbox change
+  const handleCheckboxChange = (event) => {
+    const { value, checked } = event.target;
+    setErrorBoarderLang(false);
+    if (value === 'All') {
+      setSelectedLanguages(
+        checked ? ['All', 'DK', 'DE', 'NO', 'FI', 'SE'] : []
+      );
+    } else {
+      setSelectedLanguages((prevSelected) => {
+        const newSelected = checked
+          ? [...prevSelected, value]
+          : prevSelected.filter((lang) => lang !== value);
+
+        if (newSelected.length === 5) {
+          return ['All', ...newSelected];
+        }
+
+        return newSelected.filter((lang) => lang !== 'All');
+      });
     }
   };
 
@@ -63,7 +119,7 @@ const Newpostmodal = ({ show, handleClose, refreshData }) => {
               />
             </div>
           </div>
-          <div className="mb-2">
+          {/* <div className="mb-2">
             <div>
               <label>Content</label>
             </div>
@@ -75,7 +131,7 @@ const Newpostmodal = ({ show, handleClose, refreshData }) => {
                 required
               ></textarea>
             </div>
-          </div>
+          </div> */}
           {/* <div>
             <label className="mr-2">Publish to:</label>
             <select className="form-select" name="language" required>
@@ -88,30 +144,94 @@ const Newpostmodal = ({ show, handleClose, refreshData }) => {
             </select>
           </div> */}
           <div>
-            <label>Publish to:</label>
             <div>
+              <label>Content</label>
+            </div>
+            <div>
+              <ReactQuill
+              className={`form-content-editor ${errorBoarderContent ? 'contenteditor-error-border' : ''}`}
+                name="content"
+                theme="snow"
+                value={editorHtml}
+                style={{ marginBottom: "4em" }}
+                onChange={handleChange}
+                required
+              />
+            </div>
+          </div>
+          <div>
+            <label>Publish to:</label>
+            <div className="checkbox-container">
               <label>
-                <input type="checkbox" name="categories" value="All" /> All
+                <input
+                  className={`${errorBoarderLang ? 'checkbox-error-border' : ''}`}
+                  type="checkbox"
+                  name="categories"
+                  value="All"
+                  checked={selectedLanguages.includes('All')}
+                  onChange={handleCheckboxChange}
+                />{' '}
+                All
               </label>
               <br />
               <label>
-                <input type="checkbox" name="categories" value="DK" /> Denmark
+                <input
+                  className={`${errorBoarderLang ? 'checkbox-error-border' : ''}`}
+                  type="checkbox"
+                  name="categories"
+                  value="DK"
+                  checked={selectedLanguages.includes('DK')}
+                  onChange={handleCheckboxChange}
+                />{' '}
+                Denmark
               </label>
               <br />
               <label>
-                <input type="checkbox" name="categories" value="DE" /> Germany
+                <input
+                  className={`${errorBoarderLang ? 'checkbox-error-border' : ''}`}
+                  type="checkbox"
+                  name="categories"
+                  value="DE"
+                  checked={selectedLanguages.includes('DE')}
+                  onChange={handleCheckboxChange}
+                />{' '}
+                Germany
               </label>
               <br />
               <label>
-                <input type="checkbox" name="categories" value="NO" /> Norway
+                <input
+                  className={`${errorBoarderLang ? 'checkbox-error-border' : ''}`}
+                  type="checkbox"
+                  name="categories"
+                  value="NO"
+                  checked={selectedLanguages.includes('NO')}
+                  onChange={handleCheckboxChange}
+                />{' '}
+                Norway
               </label>
               <br />
               <label>
-                <input type="checkbox" name="categories" value="FI" /> Finland
+                <input
+                  className={`${errorBoarderLang ? 'checkbox-error-border' : ''}`}
+                  type="checkbox"
+                  name="categories"
+                  value="FI"
+                  checked={selectedLanguages.includes('FI')}
+                  onChange={handleCheckboxChange}
+                />{' '}
+                Finland
               </label>
               <br />
               <label>
-                <input type="checkbox" name="categories" value="SE" /> Sweden
+                <input
+                  className={`${errorBoarderLang ? 'checkbox-error-border' : ''}`}
+                  type="checkbox"
+                  name="categories"
+                  value="SE"
+                  checked={selectedLanguages.includes('SE')}
+                  onChange={handleCheckboxChange}
+                />{' '}
+                Sweden
               </label>
             </div>
           </div>

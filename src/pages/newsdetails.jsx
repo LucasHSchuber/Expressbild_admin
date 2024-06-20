@@ -30,6 +30,7 @@ const Newsdetails = () => {
     DE: 0,
     NO: 0,
   });
+  const [refreshCount, setRefreshCount] = useState(1);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -98,6 +99,7 @@ const Newsdetails = () => {
     fetchNews();
     fetchUsers();
     fetchReadAllNews();
+    setRefreshCount((prevCount) => prevCount + 1);
   };
 
   useEffect(() => {
@@ -124,7 +126,7 @@ const Newsdetails = () => {
     };
 
     mergeNewsIntoReadNews();
-  }, [news, readNews]);
+  }, [news, readNews, refreshCount]);
 
   useEffect(() => {
     const countSumCountries = () => {
@@ -165,7 +167,7 @@ const Newsdetails = () => {
     if (users.length > 0) {
       countSumCountries();
     }
-  }, [users]);
+  }, [users, refreshCount]);
 
   useEffect(() => {
     const pullNewsFromCombinedNews = () => {
@@ -180,10 +182,12 @@ const Newsdetails = () => {
     }
   }, [combinedNews, item.news.id]);
 
-  const handleOpenModal = () => {
-    setShowModal(true);
-    console.log('Modal opened from newsdetails.jsx');
-  };
+  //run filterUserByConfirm if pulledNews is updated
+  useEffect(() => {
+    if (pulledNews) {
+      filterUsersByConfirm();
+    }
+  }, [pulledNews, users]);
 
   //filter out all users that have read news
   const filterUsersByConfirm = () => {
@@ -200,13 +204,24 @@ const Newsdetails = () => {
     setFilteredUsers(finalFilteredUsers);
   };
 
+  //handle open modal
+  const handleOpenModal = () => {
+    setShowModal(true);
+    console.log('Modal opened from newsdetails.jsx');
+  };
   //handle close modal
   const handleCloseModal = () => {
     setShowModal(false);
   };
 
-  const handleSubmitPost = (post) => {
-    console.log('Post submitted:', post);
+  //delete confrim
+  const handleDeleteClick = (newsId) => {
+    const userConfirmed = window.confirm(
+      'Are you sure you want to delete this news item?'
+    );
+    if (userConfirmed) {
+      deleteNews(newsId);
+    }
   };
 
   //Method to delete post
@@ -236,7 +251,7 @@ const Newsdetails = () => {
 
   //Redirect user after delete news
   const navigateToPublishednews = () => {
-    navigate('/publishednews');
+    navigate('/');
   };
 
   if (!item) {
@@ -245,18 +260,18 @@ const Newsdetails = () => {
 
   return (
     <div className="page-wrapper">
-      <button className="button cancel mb-5" onClick={() => navigate(-1)}>
-        <FontAwesomeIcon icon={faCaretLeft} /> Back
+      <button className="back mb-5" onClick={() => navigate(-1)}>
+        <FontAwesomeIcon icon={faCaretLeft} />
       </button>
 
       <div className="news-details d-flex">
         {pulledNews && (
-          <div className="left-box mr-5 mt-4">
-            <div className='inner-left-box'>
+          <div className="left-box mr-5 ">
+            <div className="inner-left-box">
               <h5>
                 <b>{pulledNews?.news?.title}</b> {/* Display the title */}
               </h5>
-              <p>{pulledNews?.news?.content}</p>
+              <div dangerouslySetInnerHTML={{ __html: pulledNews?.news?.content }}></div>
               <hr></hr>
               <p>
                 <strong>Created at:</strong>{' '}
@@ -270,8 +285,7 @@ const Newsdetails = () => {
                 <strong>Published to:</strong>{' '}
                 {pulledNews?.news?.lang.join(', ')}
               </p>
-            </div>
-            <div className="ml-4 mt-4">
+              <div className="mt-4">
               <button
                 className="button mr-2 standard"
                 onClick={handleOpenModal}
@@ -279,11 +293,12 @@ const Newsdetails = () => {
                 <FontAwesomeIcon icon={faPenToSquare} /> Edit
               </button>
               <button
-                className="button standard"
-                onClick={() => deleteNews(pulledNews?.news?.id)}
+                className="button delete"
+                onClick={() => handleDeleteClick(pulledNews?.news?.id)}
               >
                 <FontAwesomeIcon icon={faTrashAlt} /> Delete
               </button>
+            </div>
             </div>
           </div>
         )}
@@ -321,6 +336,18 @@ const Newsdetails = () => {
             <div>
               <h6 style={{ borderBottom: '0.5px solid #dcdcdc' }}>
                 Not confirmed by:
+                <span
+                  className="ml-2"
+                  style={{ color: 'red', fontSize: '0.8em' }}
+                >
+                  ({filteredUsers && filteredUsers.length}/
+                  {Array.isArray(item.news.lang) && item.news.lang.length > 0
+                    ? item.news.lang
+                        .map((lang) => languageCounts[lang.trim()])
+                        .reduce((a, b) => a + b, 0)
+                    : '0'}
+                  )
+                </span>
               </h6>
               <span>
                 {filteredUsers.length > 0 && filteredUsers ? (
@@ -344,7 +371,6 @@ const Newsdetails = () => {
       <Editpostmodal
         show={showModal}
         handleClose={handleCloseModal}
-        handleSubmit={handleSubmitPost}
         item={pulledNews}
         refreshData={fetchAllData}
       />

@@ -14,7 +14,9 @@ const Newpostbutton = ({ onClick }) => {
 
   return (
     <div className="newpost" onClick={onClick}>
-      <button className="newpost-button"><FontAwesomeIcon icon={faPlus} /></button>
+      <button className="newpost-button">
+        <FontAwesomeIcon icon={faPlus} />
+      </button>
     </div>
   );
 };
