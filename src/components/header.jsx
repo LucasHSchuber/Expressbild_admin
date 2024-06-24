@@ -11,7 +11,7 @@ const Header = () => {
         <ul className="d-flex nav-list">
           <li>
             <Link to="/" className="navlink">
-            Published News
+              Published News
             </Link>
           </li>
           <li>

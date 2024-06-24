@@ -5,7 +5,6 @@ import Newsdetails from './pages/newsdetails';
 import Recentshot from './pages/recentshot';
 // import "./App.css";
 
-import '../src/assets/css/main.css';
 import '../src/assets/css/buttons.css';
 
 function App() {

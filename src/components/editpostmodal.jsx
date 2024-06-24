@@ -15,15 +15,14 @@ const Editpostmodal = ({
   item,
   refreshData,
 }) => {
-
   if (!show) return null;
 
-    //handle change for ReactQuill text-editor
-    const handleChangeContent = (html) => {
-        setEditorHtml(html);
-        setErrorBoarderContent(false);
-        console.log(editorHtml);
-      };
+  //handle change for ReactQuill text-editor
+  const handleChangeContent = (html) => {
+    setEditorHtml(html);
+    setErrorBoarderContent(false);
+    console.log(editorHtml);
+  };
 
   //define states
   const [title, setTitle] = useState(item.news.title);
@@ -45,7 +44,7 @@ const Editpostmodal = ({
   }, [item]);
 
   const handleChangeTitle = (e) => setTitle(e.target.value);
-//   const handleChangeContent = (e) => setContent(e.target.value);
+  //   const handleChangeContent = (e) => setContent(e.target.value);
   const handleCheckboxChange = (e) => {
     const { value, checked } = e.target;
     setErrorBoarderLang(false);
@@ -116,7 +115,7 @@ const Editpostmodal = ({
         <form onSubmit={submitForm}>
           <div className="mb-2">
             <div>
-              <label>Title</label>
+              <label>Title:</label>
             </div>
             <div>
               <input
@@ -132,15 +131,15 @@ const Editpostmodal = ({
           </div>
           <div>
             <div>
-              <label>Content</label>
+              <label>Content:</label>
             </div>
             <div>
               <ReactQuill
-              className={`form-content-editor ${errorBoarderContent ? 'contenteditor-error-border' : ''}`}
+                className={`form-content-editor ${errorBoarderContent ? 'contenteditor-error-border' : ''}`}
                 name="content"
                 theme="snow"
                 value={editorHtml}
-                style={{ marginBottom: "4em" }}
+                style={{ marginBottom: '4em' }}
                 onChange={handleChangeContent}
                 required
               />

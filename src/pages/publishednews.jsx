@@ -17,6 +17,8 @@ import {
   faTrashAlt,
 } from '@fortawesome/free-solid-svg-icons';
 
+import '../assets/css/main_adminfornews.css';
+
 const Publishednews = () => {
   //define states
   const [news, setNews] = useState([]);
@@ -247,7 +249,7 @@ const Publishednews = () => {
         <tbody>
           {combinedNews && combinedNews.length > 0 ? (
             combinedNews
-              .slice() 
+              .slice()
               .sort((a, b) => {
                 // Sorting by created_at in descending order
                 const dateA = new Date(a.news.created_at);
@@ -263,7 +265,7 @@ const Publishednews = () => {
                   <td title={item.news.title}>{item.news.title}</td>
                   <td title={item.news.content}>
                     {item.news.content && item.news.content.length > 40
-                      ? item.news.content.substring(0, 40) + "..."
+                      ? item.news.content.substring(0, 40) + '...'
                       : item.news.content}
                   </td>
                   <td>

@@ -24,7 +24,7 @@ const Newpostmodal = ({ show, handleClose, refreshData }) => {
     console.log(editorHtml);
   };
 
-//submit new post form
+  //submit new post form
   const submitForm = (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
@@ -32,10 +32,10 @@ const Newpostmodal = ({ show, handleClose, refreshData }) => {
       .getAll('categories')
       .filter((category) => category !== 'All');
     const lang = selectedCategories.join(',');
-    if(editorHtml === "" || editorHtml === "<p><br></p>"){
-        console.log("Missing content");
-        setErrorBoarderContent(true);
-        return;
+    if (editorHtml === '' || editorHtml === '<p><br></p>') {
+      console.log('Missing content');
+      setErrorBoarderContent(true);
+      return;
     }
     if (lang === '') {
       console.log('Choose at least one country');
@@ -71,7 +71,7 @@ const Newpostmodal = ({ show, handleClose, refreshData }) => {
       console.log('Post news response:', response);
       refreshData();
       setSelectedLanguages([]);
-      setEditorHtml("");
+      setEditorHtml('');
     } catch (error) {
       console.error('Error posting news:', error);
     }
@@ -107,7 +107,7 @@ const Newpostmodal = ({ show, handleClose, refreshData }) => {
         <form onSubmit={submitForm}>
           <div className="mb-2">
             <div>
-              <label>Title</label>
+              <label>Title:</label>
             </div>
             <div>
               <input
@@ -145,15 +145,15 @@ const Newpostmodal = ({ show, handleClose, refreshData }) => {
           </div> */}
           <div>
             <div>
-              <label>Content</label>
+              <label>Content:</label>
             </div>
             <div>
               <ReactQuill
-              className={`form-content-editor ${errorBoarderContent ? 'contenteditor-error-border' : ''}`}
+                className={`form-content-editor ${errorBoarderContent ? 'contenteditor-error-border' : ''}`}
                 name="content"
                 theme="snow"
                 value={editorHtml}
-                style={{ marginBottom: "4em" }}
+                style={{ marginBottom: '4em' }}
                 onChange={handleChange}
                 required
               />

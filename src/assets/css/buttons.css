@@ -37,8 +37,8 @@
   transition: 0.1s;
 }
 .back:hover {
-    background-color: #efefef;
-  }
+  background-color: #efefef;
+}
 .delete {
   background-color: rgb(255, 69, 69);
   color: white;

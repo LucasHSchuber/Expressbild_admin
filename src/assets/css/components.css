@@ -51,4 +51,6 @@
   padding: 3em 3em;
   border-radius: 8px;
   width: 35em;
+  height: 75vh;
+  overflow-y: scroll;
 }

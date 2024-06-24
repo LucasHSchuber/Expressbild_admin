@@ -271,7 +271,9 @@ const Newsdetails = () => {
               <h5>
                 <b>{pulledNews?.news?.title}</b> {/* Display the title */}
               </h5>
-              <div dangerouslySetInnerHTML={{ __html: pulledNews?.news?.content }}></div>
+              <div
+                dangerouslySetInnerHTML={{ __html: pulledNews?.news?.content }}
+              ></div>
               <hr></hr>
               <p>
                 <strong>Created at:</strong>{' '}
@@ -286,19 +288,19 @@ const Newsdetails = () => {
                 {pulledNews?.news?.lang.join(', ')}
               </p>
               <div className="mt-4">
-              <button
-                className="button mr-2 standard"
-                onClick={handleOpenModal}
-              >
-                <FontAwesomeIcon icon={faPenToSquare} /> Edit
-              </button>
-              <button
-                className="button delete"
-                onClick={() => handleDeleteClick(pulledNews?.news?.id)}
-              >
-                <FontAwesomeIcon icon={faTrashAlt} /> Delete
-              </button>
-            </div>
+                <button
+                  className="button mr-2 standard"
+                  onClick={handleOpenModal}
+                >
+                  <FontAwesomeIcon icon={faPenToSquare} /> Edit
+                </button>
+                <button
+                  className="button delete"
+                  onClick={() => handleDeleteClick(pulledNews?.news?.id)}
+                >
+                  <FontAwesomeIcon icon={faTrashAlt} /> Delete
+                </button>
+              </div>
             </div>
           </div>
         )}
