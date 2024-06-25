@@ -15,10 +15,14 @@ import '../assets/css/main_recentshot.css';
 const Newsdetails = () => {
   //define states
   const [users, setUsers] = useState([]);
-  const [selectedCountry, setSelectedCountry] = useState('');
+  const [selectedCountry, setSelectedCountry] = useState('SE');
   const [latestActivities, setLatestActivities] = useState([]);
   const [searchString, setSearchString] = useState([]);
   const [expandedRow, setExpandedRow] = useState(null);
+
+  const [isAscendingPhotographer, setIsAscendingPhotographer] = useState(null);
+  const [isAscendingDate, setIsAscendingDate] = useState(null);
+  const [isAscendingActivity, setIsAscendingActivity] = useState(null);
 
   const fetchAllData = () => {
     //fetching all users
@@ -76,6 +80,8 @@ const Newsdetails = () => {
           const latestActivities = getLatestActivities(
             responseActivities.data.result
           );
+
+          // const latestActivitiesSE = latestActivities.filter(l => l.photographer.lang === "SE")
 
           console.log('Latest activities:', latestActivities);
           setLatestActivities(latestActivities);
@@ -150,18 +156,20 @@ const Newsdetails = () => {
           console.log('Latest activities:', latestActivities);
 
           if (searchString !== '') {
-            latestActivities = latestActivities.filter((activity) => {
-              const fullName = `${activity.photographer.firstname.toLowerCase()} ${activity.photographer.surname.toLowerCase()}`;
-              const username = activity.photographer.username.toLowerCase();
+            latestActivities = latestActivities.filter((searchData) => {
+              const fullName = `${searchData.photographer.firstname.toLowerCase()} ${searchData.photographer.surname.toLowerCase()}`;
+              const username = searchData.photographer.username.toLowerCase();
+              const activity = searchData.activity.project_name.toLowerCase();
               return (
                 (fullName.includes(searchString) ||
-                  username.includes(searchString)) &&
-                activity.photographer.lang === selectedCountry
+                  username.includes(searchString) ||
+                  activity.includes(searchString)) &&
+                searchData.photographer.lang === selectedCountry
               );
             });
           } else {
             latestActivities = latestActivities.filter(
-              (activity) => activity.photographer.lang === selectedCountry
+              (searchData) => searchData.photographer.lang === selectedCountry
             );
           }
 
@@ -183,10 +191,46 @@ const Newsdetails = () => {
     console.log(e.target.value);
     setSelectedCountry(e.target.value);
   };
+
   //order by photographer
   const orderByPhotographer = () => {
-    console.log('order by photographer');
+    const sortedActivities = [...latestActivities].sort((a, b) => {
+      const nameA = `${a.photographer.firstname.toLowerCase()} ${a.photographer.surname.toLowerCase()}`;
+      const nameB = `${b.photographer.firstname.toLowerCase()} ${b.photographer.surname.toLowerCase()}`;
+      if (nameA < nameB) return isAscendingPhotographer ? -1 : 1;
+      if (nameA > nameB) return isAscendingPhotographer ? 1 : -1;
+      return 0;
+    });
+    setIsAscendingPhotographer(!isAscendingPhotographer);
+    setLatestActivities(sortedActivities);
   };
+
+  //order by activity name
+  const orderByActivity = () => {
+    const sortedActivities = [...latestActivities].sort((a, b) => {
+      const aA = `${a.activity.project_name}`;
+      const aB = `${b.activity.project_name}`;
+      if (aA < aB) return isAscendingActivity ? -1 : 1;
+      if (aA > aB) return isAscendingActivity ? 1 : -1;
+      return 0;
+    });
+    setIsAscendingActivity(!isAscendingActivity);
+    setLatestActivities(sortedActivities);
+  };
+
+  //order by date
+  const orderByDate = () => {
+    const sortedActivities = [...latestActivities].sort((a, b) => {
+      const dateA = `${a.activity.activity_start}`;
+      const dateB = `${b.activity.activity_start}`;
+      if (dateA < dateB) return isAscendingDate ? -1 : 1;
+      if (dateA > dateB) return isAscendingDate ? 1 : -1;
+      return 0;
+    });
+    setIsAscendingDate(!isAscendingDate);
+    setLatestActivities(sortedActivities);
+  };
+
   //opening expanded inner tr
   const handleRowClick = (photographerId) => {
     setExpandedRow(expandedRow === photographerId ? null : photographerId);
@@ -199,10 +243,12 @@ const Newsdetails = () => {
       </h6>
 
       <div className="mb-4">
-        <label htmlFor="country" style={{ fontSize: "0.9em" }}>Select a country: </label>
+        <label htmlFor="country" style={{ fontSize: '0.9em' }}>
+          Select a country:{' '}
+        </label>
         <select
           id="country"
-          className='select-box'
+          className="select-box"
           value={selectedCountry}
           onChange={handleChangeCountry}
         >
@@ -219,7 +265,7 @@ const Newsdetails = () => {
       <div>
         <input
           className="search-bar mb-4"
-          placeholder="Search for photographer or email"
+          placeholder="Search for photographer, email or activity"
           value={searchString}
           onChange={handleSearchChange}
         />
@@ -231,13 +277,28 @@ const Newsdetails = () => {
             <th>
               Photographer:{' '}
               <FontAwesomeIcon
+                className="sort-button"
                 icon={faArrowDownWideShort}
                 onClick={() => orderByPhotographer()}
               />
             </th>
             <th>Email:</th>
-            <th>Activity name:</th>
-            <th>Date:</th>
+            <th>
+              Activity:{' '}
+              <FontAwesomeIcon
+                className="sort-button"
+                icon={faArrowDownWideShort}
+                onClick={() => orderByActivity()}
+              />
+            </th>
+            <th>
+              Date:{' '}
+              <FontAwesomeIcon
+                className="sort-button"
+                icon={faArrowDownWideShort}
+                onClick={() => orderByDate()}
+              />
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -274,6 +335,32 @@ const Newsdetails = () => {
                             <strong>Photographer:</strong>{' '}
                             {item.photographer.firstname}{' '}
                             {item.photographer.surname}
+                          </h6>
+                          <h6>
+                            <strong>Check point:</strong>{' '}
+                            <a
+                              href={`https://${
+                                item.photographer.lang === 'SE'
+                                  ? 'shop.expressbild.se'
+                                  : item.photographer.lang === 'FI'
+                                    ? 'shop.expresskuva.fi'
+                                    : item.photographer.lang === 'DK'
+                                      ? 'shop.billedexpressen.dk'
+                                      : item.photographer.lang === 'NO'
+                                        ? 'shop.fotoexpressen.no'
+                                        : item.photographer.lang === 'DE'
+                                          ? 'shop.bildexpressen.de'
+                                          : ''
+                              }/admin/prophoto/jobs/report.php?jobid=${item.activity.project_uuid}&activity=#/tab/8?extra=0&extra2=1`}
+                              target="_blank"
+                              style={{
+                                textDecoration: 'underline',
+                                color: 'blue',
+                                cursor: 'pointer',
+                              }}
+                            >
+                              Click here to navigate checkpoint
+                            </a>{' '}
                           </h6>
                         </div>
                         <table className="control-sheet-table">

@@ -7,11 +7,11 @@
 .search-bar:focus {
   outline: 0.5px solid gray;
 }
-.select-box{
-    width: 10em;
-    margin: 0 0 0 0.7em;
-    font-size: 0.9em;
-    height: 2.1em;
+.select-box {
+  width: 10em;
+  margin: 0 0 0 0.7em;
+  font-size: 0.9em;
+  height: 2.1em;
 }
 .control-sheet-table tbody tr td {
   padding: 6px 15px;
@@ -25,4 +25,16 @@
 }
 .control-sheet-headers h6 {
   font-size: 1em;
+}
+.sort-button {
+  background-color: inherit;
+  margin: 0 0 -0.2em 0.8em;
+  padding: 0.2em;
+  cursor: pointer;
+  transition: 0.2s;
+  font-size: 1.2em;
+  border-radius: 4px;
+}
+.sort-button:hover {
+  background-color: #efefef !important;
 }
