@@ -5,7 +5,7 @@
   top: 0;
   left: 0;
   padding: 1.5em 3em 1em 3em;
-  background-color: rgb(242, 242, 242);
+  background-color: rgb(55, 55, 55);
   width: 100%;
 }
 
@@ -14,7 +14,7 @@
 }
 
 .navlink {
-  color: black;
+  color: rgb(255, 255, 255);
   padding-right: 5em;
   list-style-type: none;
   font-weight: 600;
@@ -22,6 +22,6 @@
 }
 
 .navlink:hover {
-  color: rgb(85, 85, 85);
+  color: rgb(203, 203, 203);
   text-decoration: none;
 }
