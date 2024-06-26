@@ -22,6 +22,7 @@ const Recentshot = () => {
   const [searchString, setSearchString] = useState([]);
   const [dataForControlSheet, setDataForControlSheet] = useState([]);
   const [expandedRow, setExpandedRow] = useState(null);
+  const [expandedInnerRow, setExpandedInnerRow] = useState(null);
 
   const [isAscendingPhotographer, setIsAscendingPhotographer] = useState(null);
   const [isAscendingDate, setIsAscendingDate] = useState(null);
@@ -232,15 +233,21 @@ const Recentshot = () => {
     setLatestActivities(sortedActivities);
   };
 
-  //opening expanded inner tr
+  //handle table row click
   const handleRowClick = (photographerId) => {
     setExpandedRow(expandedRow === photographerId ? null : photographerId);
     const _allActivitiesByUser = allActivities.filter(
       (r) => r.photographer.id === photographerId
     );
     console.log('All activities by user:', _allActivitiesByUser);
-    setDataForControlSheet("");
+    setDataForControlSheet('');
+    setExpandedInnerRow('');
     setAllActivitiesByUser(_allActivitiesByUser);
+  };
+
+  //handle inner table inner row click
+  const handleInnerRowClick = (photographerId) => {
+    setExpandedInnerRow(expandedInnerRow === photographerId ? null : photographerId);
   };
 
   const handleChangeControlSheet = (e) => {
@@ -256,7 +263,8 @@ const Recentshot = () => {
         <b>Recent shot:</b>
       </h6>
 
-      <div className="mb-5">
+      {/* select box */}
+      <div className="mb-2">
         <label htmlFor="country" style={{ fontSize: '0.9em' }}>
           Select a country:{' '}
         </label>
@@ -274,14 +282,18 @@ const Recentshot = () => {
         </select>
       </div>
 
+      <hr></hr>
+
+      {/* search bar */}
       <div>
         <input
-          className="search-bar mb-3"
+          className="search-bar mb-3 mt-4"
           placeholder="Search for photographer or email.."
           value={searchString}
           onChange={handleSearchChange}
         />
       </div>
+      
       {/* main table */}
       <table className="table ">
         <thead>
@@ -310,7 +322,7 @@ const Recentshot = () => {
             latestActivities.map((item) => (
               <React.Fragment key={item.photographer.id}>
                 <tr
-                  className={`tr-tbody ${item.photographer.id === expandedRow ? 'selected-tr' : ''}`}
+                  className={`outer-tr ${item.photographer.id === expandedRow ? 'selected-tr' : ''}`}
                   onClick={() => handleRowClick(item.photographer.id)}
                 >
                   <td>
@@ -325,7 +337,7 @@ const Recentshot = () => {
                     <td colSpan="3" className="expanded-inner-table">
                       <div className="flex-container">
                         <div className="flex-item left-inner-table">
-                          {/* <h6>Activity Details</h6> */}
+                          <h6 className='mt-3' style={{ fontSize: "1em" }}><b>All activites by {item.photographer.firstname} {item.photographer.surname}:</b> <br></br><em>Click on an activity to open control sheet</em></h6>
                           <table className="control-sheet-table">
                             <thead>
                               <tr>
@@ -335,11 +347,13 @@ const Recentshot = () => {
                             </thead>
                             <tbody>
                               {allActivitiesByUser.length > 0 ? (
-                                allActivitiesByUser.map((a) => (
+                                allActivitiesByUser.
+                                  sort((a, b) => new Date(b.activity.activity_start) - new Date(a.activity.activity_start))
+                                  .map((a) => (
                                   <tr
                                     key={a.activity.project_uuid}
-                                    className="expanded-inner-tr"
-                                    onClick={() => handleChangeControlSheet(a)}
+                                    className={`expanded-inner-tr ${a.activity.project_uuid === expandedInnerRow ? "selected-inner-tr" : "" }`}
+                                    onClick={() => {handleChangeControlSheet(a); handleInnerRowClick(a.activity.project_uuid)}}
                                   >
                                     <td>
                                       {a.activity.project_name}{' '}
@@ -362,25 +376,31 @@ const Recentshot = () => {
                           </table>
                         </div>
 
+                        {/* <h6>Control sheet: </h6> */}
                         {dataForControlSheet && (
-                          <div className={`flex-item right-inner-table ${dataForControlSheet ? "show-right-inner-table" : ""}`} >
-                            {/* <h6>Control sheet</h6> */}
+                          <div
+                            className={`flex-item right-inner-table ${dataForControlSheet ? 'show-right-inner-table' : ''}`}
+                          >
                             <div>
                               <tr
                                 key={`${dataForControlSheet?.photographer?.id}-details`}
+                                 className='control-sheet-box'
                               >
                                 <td
                                   colSpan="4"
-                                  className="expanded-inner-table"
-                                  
+                                  className="inner-table-td"
                                 >
-                                  <div style={{ paddingTop: "1.5em"}}>
+                                  <div style={{ paddingTop: '1.5em' }}>
                                     <div className="mb-4  control-sheet-headers">
                                       <h6>
-                                        <strong>Activity Name:</strong>{' '}
+                                        <strong>Activity name:</strong>{' '}
                                         {
                                           dataForControlSheet?.activity
                                             ?.project_name
+                                        }{" "} 
+                                        {
+                                          dataForControlSheet?.activity
+                                            ?.activity_name
                                         }
                                       </h6>
                                       <h6>
@@ -433,7 +453,7 @@ const Recentshot = () => {
                                             cursor: 'pointer',
                                           }}
                                         >
-                                          Click here to navigate checkpoint
+                                          Click here to navigate to checkpoint
                                         </a>{' '}
                                       </h6>
                                     </div>
@@ -487,7 +507,8 @@ const Recentshot = () => {
                                           <strong>Anomaly report:</strong>{' '}
                                         </h6>
                                         <h6>
-                                          {dataForControlSheet?.reports.length > 0 ? (
+                                          {dataForControlSheet?.reports.length >
+                                          0 ? (
                                             dataForControlSheet?.reports[0]
                                               ?.text
                                           ) : (
@@ -516,6 +537,7 @@ const Recentshot = () => {
                             </div>
                           </div>
                         )}
+
                       </div>
                     </td>
                   </tr>
