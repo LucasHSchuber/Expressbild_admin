@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useParams } from 'react-router-dom';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -33,8 +34,15 @@ const Newsdetails = () => {
   const [refreshCount, setRefreshCount] = useState(1);
 
   const location = useLocation();
+  
   const navigate = useNavigate();
   const { item } = location.state || {};
+ 
+  const { id } = useParams();
+  
+  useEffect(() => {
+    console.log('ID from URL:', id);
+  }, [id]);
 
   const fetchAllData = () => {
     //fetching all news

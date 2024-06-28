@@ -13,7 +13,7 @@ function App() {
       <div className="content">
         <div className="route-layout">
           <Routes>
-            <Route path="/" element={<Publishednews />} />
+            <Route path="/:token" element={<Publishednews />} />
             {/* <Route path="/publishednews" element={<Publishednews />} /> */}
             <Route path="/newsdetails/:id" element={<Newsdetails />} />
             <Route path="/recentshot" element={<Recentshot />} />

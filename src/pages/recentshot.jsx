@@ -347,8 +347,8 @@ const Recentshot = () => {
                             </thead>
                             <tbody>
                               {allActivitiesByUser.length > 0 ? (
-                                allActivitiesByUser.
-                                  sort((a, b) => new Date(b.activity.activity_start) - new Date(a.activity.activity_start))
+                                allActivitiesByUser
+                                  .sort((a, b) => new Date(b.activity.activity_start) - new Date(a.activity.activity_start))
                                   .map((a) => (
                                   <tr
                                     key={a.activity.project_uuid}
@@ -460,7 +460,7 @@ const Recentshot = () => {
                                     <table className="control-sheet-table">
                                       <thead>
                                         <tr>
-                                          <th>Team name:</th>
+                                          <th>Team/class name:</th>
                                           <th>Portrait:</th>
                                           <th>Group:</th>
                                         </tr>
