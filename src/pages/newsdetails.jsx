@@ -1,8 +1,8 @@
 // src/pages/NewsDetail.jsx
 import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
-import { useParams } from 'react-router-dom';
+
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -14,6 +14,11 @@ import {
 import Editpostmodal from '../components/editpostmodal';
 
 const Newsdetails = () => {
+
+  const location = useLocation();
+  const { item } = location.state || {};
+ 
+  
   //define states
   const [loading, setLoading] = useState(true);
 
@@ -32,87 +37,87 @@ const Newsdetails = () => {
     NO: 0,
   });
   const [refreshCount, setRefreshCount] = useState(1);
+  const [token, setToken] = useState('');
 
-  const location = useLocation();
-  
-  const navigate = useNavigate();
-  const { item } = location.state || {};
- 
-  const { id } = useParams();
-  
+  // Fetch token from URL query parameters
   useEffect(() => {
-    console.log('ID from URL:', id);
-  }, [id]);
-
-  const fetchAllData = () => {
-    //fetching all news
-    const fetchNews = async () => {
-      const token = '666ab2a5be8ee1.66302861';
-      try {
-        const response = await axios.get(
-          '/api/index.php/rest/photographer_portal/news',
-          {
-            headers: {
-              Authorization: `Admin ${token}`,
-              'Content-Type': 'application/json',
-            },
-          }
-        );
-        console.log('Fetched news:', response.data.result);
-        setNews(response.data.result);
-      } catch (error) {
-        console.error('Error fetching news:', error);
-      }
-    };
-    //fetching all users
-    const fetchUsers = async () => {
-      const token = '666ab2a5be8ee1.66302861';
-      try {
-        const responseUsers = await axios.get(
-          '/api/index.php/rest/photographer_portal/users',
-          {
-            headers: {
-              Authorization: `Admin ${token}`,
-              'Content-Type': 'application/json',
-            },
-          }
-        );
-        console.log('Fetched users:', responseUsers.data.result);
-        setUsers(responseUsers.data.result);
-      } catch (error) {
-        console.error('Error fetching users:', error);
-      }
+    const fetchToken = () => {
+      const queryParams = new URLSearchParams(location.search);
+      const tokenFromQuery = queryParams.get('token');
+      console.log(tokenFromQuery)
+      setToken(tokenFromQuery || ''); // Set token or an empty string if not found
     };
 
-    //fetching all read post
-    const fetchReadAllNews = async () => {
-      const token = '666ab2a5be8ee1.66302861';
-      try {
-        const responseRead = await axios.get(
-          '/api/index.php/rest/photographer_portal/newsread',
-          {
-            headers: {
-              Authorization: `Admin ${token}`,
-              'Content-Type': 'application/json',
-            },
-          }
-        );
-        console.log('Fetched read-news:', responseRead.data.result);
-        setReadNews(responseRead.data.result);
-      } catch (error) {
-        console.error('Error fetching read-news:', error);
-      }
-    };
+    fetchToken();
+  }, [location]);
 
-    fetchNews();
-    fetchUsers();
-    fetchReadAllNews();
-    setRefreshCount((prevCount) => prevCount + 1);
-  };
 
+  // Fetch all necessary data when component mounts
   useEffect(() => {
+    const fetchAllData = async () => {
+      // Fetch news data
+      const fetchNews = async () => {
+        try {
+          const response = await axios.get(
+            '/api/index.php/rest/photographer_portal/news',
+            {
+              headers: {
+                Authorization: `Admin ${token}`,
+                'Content-Type': 'application/json',
+              },
+            }
+          );
+          setNews(response.data.result);
+        } catch (error) {
+          console.error('Error fetching news:', error);
+        }
+      };
+
+      // Fetch users data
+      const fetchUsers = async () => {
+        try {
+          const responseUsers = await axios.get(
+            '/api/index.php/rest/photographer_portal/users',
+            {
+              headers: {
+                Authorization: `Admin ${token}`,
+                'Content-Type': 'application/json',
+              },
+            }
+          );
+          setUsers(responseUsers.data.result);
+        } catch (error) {
+          console.error('Error fetching users:', error);
+        }
+      };
+
+      // Fetch read news data
+      const fetchReadAllNews = async () => {
+        try {
+          const responseRead = await axios.get(
+            '/api/index.php/rest/photographer_portal/newsread',
+            {
+              headers: {
+                Authorization: `Admin ${token}`,
+                'Content-Type': 'application/json',
+              },
+            }
+          );
+          setReadNews(responseRead.data.result);
+        } catch (error) {
+          console.error('Error fetching read-news:', error);
+        }
+      };
+
+      // Call all fetch functions
+      fetchNews();
+      fetchUsers();
+      fetchReadAllNews();
+    };
+
     fetchAllData();
-  }, []);
+  }, [token]); // Fetch data whenever token changes
+
 
   useEffect(() => {
     // Merge arrays
@@ -180,15 +185,21 @@ const Newsdetails = () => {
   useEffect(() => {
     const pullNewsFromCombinedNews = () => {
       const pulled = combinedNews.find((r) => r.news.id === item.news.id);
-      setPulledNews(pulled);
-      filterUsersByConfirm();
+      if (pulled) {
+        setPulledNews(pulled);
+        filterUsersByConfirm();
+        console.log("pulled", pulled);
+      } else {
+        console.warn(`News with id ${item.news.id} not found in combinedNews.`);
+        // Optionally handle what to do when news is not found
+      }
     };
-
-    if (combinedNews.length > 0) {
+  
+    if (combinedNews.length > 0 && item?.news?.id) {
       pullNewsFromCombinedNews();
-      console.log('pulledNews:', pulledNews);
     }
-  }, [combinedNews, item.news.id]);
+  }, [combinedNews, item]);
+  
 
   //run filterUserByConfirm if pulledNews is updated
   useEffect(() => {
@@ -263,6 +274,10 @@ const Newsdetails = () => {
   };
 
   if (!item) {
+    return <div>No news details available.</div>;
+  }
+
+  if (!pulledNews || !pulledNews.news) {
     return <div>No news details available.</div>;
   }
 

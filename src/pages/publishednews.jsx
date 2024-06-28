@@ -1,9 +1,7 @@
 // src/pages/Home.jsx
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useParams } from 'react-router-dom';
-
+import { useNavigate, useLocation } from 'react-router-dom';
 
 import Newpostbutton from '../components/newpostbutton';
 import Newpostmodal from '../components/newpostmodal';
@@ -35,17 +33,23 @@ const Publishednews = () => {
     DE: 0,
     NO: 0,
   });
-  const [_token, set_Token] = useState([]);
+  // const [_token, set_Token] = useState([]);
 
   const navigate = useNavigate();
-  const { token } = useParams();
-  useEffect(() => {
-    console.log('Token from URL:', token);
-    set_Token(token);
-    console.log("token from statehook", _token)
-  }, [token]);
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const token = queryParams.get('token'); 
+  console.log(token);
 
-  const fetchAllData = () => {
+  // set_Token(token);
+  // const { token } = useParams();
+  // useEffect(() => {
+  //   console.log('Token from URL:', token);
+  //   set_Token(token);
+  //   console.log("token from statehook", _token)
+  // }, [token]);
+
+  const fetchAllData = async () => {
     //fetching all news
     const fetchNews = async () => {
       // const token = '666ab2a5be8ee1.66302861';
@@ -104,15 +108,13 @@ const Publishednews = () => {
         console.error('Error fetching read-news:', error);
       }
     };
+    await Promise.all([fetchNews(), fetchUsers(), fetchReadAllNews()]);
 
-    fetchNews();
-    fetchUsers();
-    fetchReadAllNews();
   };
 
   useEffect(() => {
     fetchAllData();
-  }, []);
+  }, [token]);
 
   useEffect(() => {
     // Merge arrays
@@ -223,7 +225,10 @@ const Publishednews = () => {
 
   const navigateToNewsdetails = (item) => {
     console.log('navigate to page:', item.news.id);
-    navigate(`/newsdetails/${item.news.id}`, { state: { item } });
+    // navigate(`/newsdetails/${item.news.id}`, { state: { item } });
+
+    navigate(`/newsdetails/${item.news.id}?token=${token}`, { state: { item } });
+
   };
 
   return (
