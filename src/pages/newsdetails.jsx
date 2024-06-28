@@ -15,6 +15,7 @@ import Editpostmodal from '../components/editpostmodal';
 
 const Newsdetails = () => {
 
+  const navigate = useNavigate();
   const location = useLocation();
   const { item } = location.state || {};
  
@@ -45,17 +46,16 @@ const Newsdetails = () => {
       const queryParams = new URLSearchParams(location.search);
       const tokenFromQuery = queryParams.get('token');
       console.log(tokenFromQuery)
-      setToken(tokenFromQuery || ''); // Set token or an empty string if not found
+      setToken(tokenFromQuery !== undefined ? tokenFromQuery : ''); // Set token or an empty string if not found
     };
 
     fetchToken();
   }, [location]);
 
 
-  // Fetch all necessary data when component mounts
-  useEffect(() => {
+   // Fetch all data effect
     const fetchAllData = async () => {
-      // Fetch news data
+      // Fetch news
       const fetchNews = async () => {
         try {
           const response = await axios.get(
@@ -67,13 +67,14 @@ const Newsdetails = () => {
               },
             }
           );
+          console.log('Fetched news:', response.data.result);
           setNews(response.data.result);
         } catch (error) {
           console.error('Error fetching news:', error);
         }
       };
 
-      // Fetch users data
+      // Fetch users
       const fetchUsers = async () => {
         try {
           const responseUsers = await axios.get(
@@ -85,13 +86,14 @@ const Newsdetails = () => {
               },
             }
           );
+          console.log('Fetched users:', responseUsers.data.result);
           setUsers(responseUsers.data.result);
         } catch (error) {
           console.error('Error fetching users:', error);
         }
       };
 
-      // Fetch read news data
+      // Fetch read news
       const fetchReadAllNews = async () => {
         try {
           const responseRead = await axios.get(
@@ -103,6 +105,7 @@ const Newsdetails = () => {
               },
             }
           );
+          console.log('Fetched read-news:', responseRead.data.result);
           setReadNews(responseRead.data.result);
         } catch (error) {
           console.error('Error fetching read-news:', error);
@@ -113,11 +116,15 @@ const Newsdetails = () => {
       fetchNews();
       fetchUsers();
       fetchReadAllNews();
+      setRefreshCount((prevCount) => prevCount + 1);
     };
 
-    fetchAllData();
-  }, [token]); // Fetch data whenever token changes
+    useEffect(() => {
 
+    fetchAllData();
+  }, [token]);
+
+  
 
   useEffect(() => {
     // Merge arrays

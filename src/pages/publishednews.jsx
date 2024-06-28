@@ -227,7 +227,7 @@ const Publishednews = () => {
     console.log('navigate to page:', item.news.id);
     // navigate(`/newsdetails/${item.news.id}`, { state: { item } });
 
-    navigate(`/newsdetails/${item.news.id}?token=${token}`, { state: { item } });
+    navigate(`/newsdetails/${item.news.id}/?token=${token}`, { state: { item } });
 
   };
 
