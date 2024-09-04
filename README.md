@@ -1,4 +1,5 @@
-# React + Vite Project
+- Express-Bild
+- Lucas Schuber
 
 ## Admin for news & Recent shot
 

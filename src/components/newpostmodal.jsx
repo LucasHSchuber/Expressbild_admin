@@ -103,6 +103,7 @@ const Newpostmodal = ({ show, handleClose, refreshData }) => {
     }
   };
 
+  
   return (
     <div className="modal-overlay">
       <div className="modal-content">
