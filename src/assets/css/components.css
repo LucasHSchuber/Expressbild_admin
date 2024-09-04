@@ -3,7 +3,7 @@
 /* New post button */
 .newpost {
   position: fixed;
-  bottom: 2em;
+  bottom: 20em;
   right: 2em;
   padding: 1em;
   background-color: #1d1d1d;

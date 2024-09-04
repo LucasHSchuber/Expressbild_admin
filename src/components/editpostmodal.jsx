@@ -86,6 +86,7 @@ const Editpostmodal = ({
         lang: selectedCategories.join(','),
       };
       console.log(post);
+      // Updating news article 
       try {
         const token = '666ab2a5be8ee1.66302861';
         const id = item.news.id;
@@ -100,8 +101,27 @@ const Editpostmodal = ({
           }
         );
         console.log('Update news response:', response);
-        refreshData();
-        handleClose();
+
+        if (response.status === 200){
+          // removing all read by data for this post
+          try { 
+            const token = '666ab2a5be8ee1.66302861';
+            const id = item.news.id;
+            const response = await axios.delete(
+              `/api/index.php/rest/photographer_portal/newsread/${id}`, {
+                headers: {
+                  Authorization: `Admin ${token}`,
+                  'Content-Type': 'application/json',
+                },
+              }
+            );
+            console.log('Delete news read response:', response);
+          } catch (error) {
+            console.log(`Error removing read by data for id ${id}`, error)
+          }
+          refreshData();
+          handleClose();
+        }
       } catch (error) {
         console.error('Error updating news:', error);
       }

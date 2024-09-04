@@ -43,14 +43,19 @@ const Newsdetails = () => {
   // Fetch token from URL query parameters
   useEffect(() => {
     const fetchToken = () => {
-      const queryParams = new URLSearchParams(location.search);
-      const tokenFromQuery = queryParams.get('token');
-      console.log(tokenFromQuery)
-      setToken(tokenFromQuery !== undefined ? tokenFromQuery : ''); // Set token or an empty string if not found
+      // Check if the environment is development
+      if (process.env.NODE_ENV === 'development') {
+        setToken('666ab2a5be8ee1.66302861');
+      } else {
+        // Fetch token from URL query parameters
+        const queryParams = new URLSearchParams(window.location.search);
+        const tokenFromQuery = queryParams.get('token');
+        console.log(tokenFromQuery);
+        setToken(tokenFromQuery !== undefined ? tokenFromQuery : ''); 
+      }
     };
-
     fetchToken();
-  }, [location]);
+  }, []);
 
 
    // Fetch all data effect
@@ -58,6 +63,7 @@ const Newsdetails = () => {
       // Fetch news
       const fetchNews = async () => {
         try {
+          // const token = '666ab2a5be8ee1.66302861';
           const response = await axios.get(
             '/api/index.php/rest/photographer_portal/news',
             {
@@ -77,6 +83,7 @@ const Newsdetails = () => {
       // Fetch users
       const fetchUsers = async () => {
         try {
+          // const token = '666ab2a5be8ee1.66302861';
           const responseUsers = await axios.get(
             '/api/index.php/rest/photographer_portal/users',
             {
@@ -96,6 +103,7 @@ const Newsdetails = () => {
       // Fetch read news
       const fetchReadAllNews = async () => {
         try {
+          // const token = '666ab2a5be8ee1.66302861';
           const responseRead = await axios.get(
             '/api/index.php/rest/photographer_portal/newsread',
             {
@@ -253,7 +261,7 @@ const Newsdetails = () => {
   //Method to delete post
   const deleteNews = async (id) => {
     console.log('deleted news:', id);
-    const token = '666ab2a5be8ee1.66302861';
+    // const token = '666ab2a5be8ee1.66302861';
     try {
       const responseDelete = await axios.delete(
         `/api/index.php/rest/photographer_portal/news/${id}`,

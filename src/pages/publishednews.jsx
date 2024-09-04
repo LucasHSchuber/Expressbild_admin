@@ -33,21 +33,30 @@ const Publishednews = () => {
     DE: 0,
     NO: 0,
   });
-  // const [_token, set_Token] = useState([]);
+  const [token, setToken] = useState("");
+
 
   const navigate = useNavigate();
-  const location = useLocation();
-  const queryParams = new URLSearchParams(location.search);
-  const token = queryParams.get('token'); 
-  console.log(token);
 
-  // set_Token(token);
-  // const { token } = useParams();
-  // useEffect(() => {
-  //   console.log('Token from URL:', token);
-  //   set_Token(token);
-  //   console.log("token from statehook", _token)
-  // }, [token]);
+
+  // Fetch token from URL query parameters
+  useEffect(() => {
+    const fetchToken = () => {
+      // Check if the environment is development
+      if (process.env.NODE_ENV === 'development') {
+        setToken('666ab2a5be8ee1.66302861');
+      } else {
+        // Fetch token from URL query parameters
+        const location = useLocation();
+        const queryParams = new URLSearchParams(location.search);
+        const token = queryParams.get('token'); 
+        console.log(token);
+        setToken(token); 
+      }
+    };
+    fetchToken();
+  }, []);
+  
 
   const fetchAllData = async () => {
     //fetching all news
@@ -201,7 +210,7 @@ const Publishednews = () => {
   //delete news from database
   const deleteNews = async (id) => {
     console.log('deleted news id:', id);
-    const token = '666ab2a5be8ee1.66302861';
+    // const token = '666ab2a5be8ee1.66302861';
     try {
       const responseDelete = await axios.delete(
         `/api/index.php/rest/photographer_portal/news/${id}`,
