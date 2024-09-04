@@ -2,11 +2,12 @@
 
 .button {
   width: 7em;
-  height: 2.5em;
+  height: 2.4em;
   border: none;
   outline: none;
   border-radius: 5px;
   cursor: pointer;
+  font-weight: 600;
 }
 .standard {
   background-color: rgb(28, 28, 28);
@@ -51,4 +52,12 @@
 .edit {
   background-color: rgb(255, 179, 0);
   color: white;
+}
+.closemodal-button{
+  font-size: 1.15em;
+  cursor: pointer;
+  color: black;
+}
+.closemodal-button:hover{
+  color: rgb(124, 124, 124);
 }

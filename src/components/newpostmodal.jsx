@@ -3,6 +3,9 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTimes } from '@fortawesome/free-solid-svg-icons';
+
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 
@@ -103,7 +106,15 @@ const Newpostmodal = ({ show, handleClose, refreshData }) => {
   return (
     <div className="modal-overlay">
       <div className="modal-content">
-        <h5 className="mb-3">Create a new post</h5>
+        <div className='d-flex justify-content-between'>
+          <h5 className="mb-3">Create a new post</h5>
+          <h6 
+            className='closemodal-button'
+            onClick={handleClose}
+          >
+             <FontAwesomeIcon icon={faTimes} />
+          </h6>
+        </div>
         <form onSubmit={submitForm}>
           <div className="mb-2">
             <div>
@@ -174,65 +185,67 @@ const Newpostmodal = ({ show, handleClose, refreshData }) => {
                 All
               </label>
               <br />
-              <label>
-                <input
-                  className={`${errorBoarderLang ? 'checkbox-error-border' : ''}`}
-                  type="checkbox"
-                  name="categories"
-                  value="DK"
-                  checked={selectedLanguages.includes('DK')}
-                  onChange={handleCheckboxChange}
-                />{' '}
-                Denmark
-              </label>
-              <br />
-              <label>
-                <input
-                  className={`${errorBoarderLang ? 'checkbox-error-border' : ''}`}
-                  type="checkbox"
-                  name="categories"
-                  value="DE"
-                  checked={selectedLanguages.includes('DE')}
-                  onChange={handleCheckboxChange}
-                />{' '}
-                Germany
-              </label>
-              <br />
-              <label>
-                <input
-                  className={`${errorBoarderLang ? 'checkbox-error-border' : ''}`}
-                  type="checkbox"
-                  name="categories"
-                  value="NO"
-                  checked={selectedLanguages.includes('NO')}
-                  onChange={handleCheckboxChange}
-                />{' '}
-                Norway
-              </label>
-              <br />
-              <label>
-                <input
-                  className={`${errorBoarderLang ? 'checkbox-error-border' : ''}`}
-                  type="checkbox"
-                  name="categories"
-                  value="FI"
-                  checked={selectedLanguages.includes('FI')}
-                  onChange={handleCheckboxChange}
-                />{' '}
-                Finland
-              </label>
-              <br />
-              <label>
-                <input
-                  className={`${errorBoarderLang ? 'checkbox-error-border' : ''}`}
-                  type="checkbox"
-                  name="categories"
-                  value="SE"
-                  checked={selectedLanguages.includes('SE')}
-                  onChange={handleCheckboxChange}
-                />{' '}
-                Sweden
-              </label>
+              <div className='d-flex justify-content-between'>
+                <label>
+                  <input
+                    className={`${errorBoarderLang ? 'checkbox-error-border' : ''}`}
+                    type="checkbox"
+                    name="categories"
+                    value="DK"
+                    checked={selectedLanguages.includes('DK')}
+                    onChange={handleCheckboxChange}
+                  />{' '}
+                  Denmark
+                </label>
+                {/* <br /> */}
+                <label>
+                  <input
+                    className={`${errorBoarderLang ? 'checkbox-error-border' : ''}`}
+                    type="checkbox"
+                    name="categories"
+                    value="DE"
+                    checked={selectedLanguages.includes('DE')}
+                    onChange={handleCheckboxChange}
+                  />{' '}
+                  Germany
+                </label>
+                {/* <br /> */}
+                <label>
+                  <input
+                    className={`${errorBoarderLang ? 'checkbox-error-border' : ''}`}
+                    type="checkbox"
+                    name="categories"
+                    value="NO"
+                    checked={selectedLanguages.includes('NO')}
+                    onChange={handleCheckboxChange}
+                  />{' '}
+                  Norway
+                </label>
+                {/* <br /> */}
+                <label>
+                  <input
+                    className={`${errorBoarderLang ? 'checkbox-error-border' : ''}`}
+                    type="checkbox"
+                    name="categories"
+                    value="FI"
+                    checked={selectedLanguages.includes('FI')}
+                    onChange={handleCheckboxChange}
+                  />{' '}
+                  Finland
+                </label>
+                {/* <br /> */}
+                <label>
+                  <input
+                    className={`${errorBoarderLang ? 'checkbox-error-border' : ''}`}
+                    type="checkbox"
+                    name="categories"
+                    value="SE"
+                    checked={selectedLanguages.includes('SE')}
+                    onChange={handleCheckboxChange}
+                  />{' '}
+                  Sweden
+                </label>
+              </div>
             </div>
           </div>
           <div className="mt-3">

@@ -48,9 +48,9 @@
 
 .modal-content {
   background: white;
-  padding: 3em 3em;
+  padding: 3em 5em 3em 5em;
   border-radius: 8px;
-  width: 35em;
-  height: 75vh;
+  width: 45em;
+  height: 70vh;
   overflow-y: scroll;
 }
