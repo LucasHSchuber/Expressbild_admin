@@ -19,6 +19,11 @@ const Header = () => {
               Recent shot
             </Link>
           </li>
+          <li>
+            <Link to="/knowledgebase" className="navlink">
+              Knowledge Base
+            </Link>
+          </li>
         </ul>
       </nav>
     </header>

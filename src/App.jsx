@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 import Publishednews from './pages/publishednews';
 import Newsdetails from './pages/newsdetails';
 import Recentshot from './pages/recentshot';
+import Knowledgebase from './pages/knowledgebase';
 // import "./App.css";
 
 import '../src/assets/css/buttons.css';
@@ -17,6 +18,7 @@ function App() {
             {/* <Route path="/publishednews" element={<Publishednews />} /> */}
             <Route path="/newsdetails/:id" element={<Newsdetails />} />
             <Route path="/recentshot" element={<Recentshot />} />
+            <Route path="/knowledgebase" element={<Knowledgebase />} />
           </Routes>
         </div>
       </div>

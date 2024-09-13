@@ -11,6 +11,8 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 import '../assets/css/main_recentshot.css';
+import '../assets/css/global.css';
+
 
 const Recentshot = () => {
   //define states
@@ -259,10 +261,11 @@ const Recentshot = () => {
 
   return (
     <div className="page-wrapper">
-      <h6 className="mb-4">
-        <b>Recent shot:</b>
-      </h6>
-
+      <div className='header-box'>
+        <h6 className="header-box mb-4">
+          <b>Recent shot:</b>
+        </h6>
+       </div>
       {/* select box */}
       <div className="mb-2">
         <label htmlFor="country" style={{ fontSize: '0.9em' }}>
@@ -355,15 +358,12 @@ const Recentshot = () => {
                                     className={`expanded-inner-tr ${a.activity.project_uuid === expandedInnerRow ? "selected-inner-tr" : "" }`}
                                     onClick={() => {handleChangeControlSheet(a); handleInnerRowClick(a.activity.project_uuid)}}
                                   >
-                                    <td>
-                                      {a.activity.project_name}{' '}
-                                      {a.activity.activity_name}
+                                    <td title={a.activity.project_name + " " + a.activity.activity_name} >
+                                      {a.activity.project_name.length > 30 ? a.activity.project_name.substring(0, 30) + ".." : a.activity.project_name}{' '}
+                                      ({a.activity.activity_name})
                                     </td>
                                     <td>
-                                      {a.activity.activity_start.substring(
-                                        0,
-                                        10
-                                      )}
+                                      {a.activity.activity_start.substring(0, 10)}
                                     </td>
                                   </tr>
                                 ))

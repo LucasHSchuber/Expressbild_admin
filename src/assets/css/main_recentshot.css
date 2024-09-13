@@ -4,9 +4,10 @@
 /* search bar */
 .search-bar {
   width: 25em;
-  height: 2.5em;
-  font-size: 0.8em;
+  height: 2.3em;
+  font-size: 0.9em;
   padding-left: 0.3em;
+  border: 1.5px solid black;
 }
 
 .search-bar:focus {
@@ -18,7 +19,8 @@
   width: 10em;
   margin: 0 0 0 0.7em;
   font-size: 0.9em;
-  height: 2.1em;
+  height: 2.3em;
+  border: 1.5px solid black;
 }
 
 .control-sheet-table {
@@ -30,7 +32,7 @@
 }
 
 .outer-tr {
-  font-size: 0.9em !important;
+  font-size: 1em !important;
 }
 .outer-tr:hover {
   background-color: #f7f7f7;
@@ -52,7 +54,7 @@
 
 .right-inner-table {
   display: none;
-  margin-top: 1.8em;
+  margin: 1.8em 0 0 2em;
 }
 .control-sheet-box{
   box-shadow: 1px 1px 5px 1px rgb(208, 208, 208, 0.4);

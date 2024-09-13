@@ -54,3 +54,6 @@
   height: 70vh;
   overflow-y: scroll;
 }
+.modal-content h5 {
+  font-weight: 600;
+}

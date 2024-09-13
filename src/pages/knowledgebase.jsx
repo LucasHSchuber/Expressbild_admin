@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 import Newpostbutton from '../components/newpostbutton';
-import Newpostmodal from '../components/newpostmodal';
+import Newpostknowledgebasemodal from '../components/newpostknowledgebasemodal';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -15,18 +15,21 @@ import {
   faGlasses,
   faGlobeAmericas,
   faTrashAlt,
-  faPlus
+  faPlus,
+  faFile
 } from '@fortawesome/free-solid-svg-icons';
 
-import '../assets/css/main_adminfornews.css';
+import '../assets/css/main_knowledgebase.css';
 import '../assets/css/global.css';
 
 
-const Publishednews = () => {
-  //define states
-  const [news, setNews] = useState([]);
+
+
+
+const Knowledgebase = () => {
+  //define states   
+  const [knowledgeBase, setKnowledgeBase] = useState([]);
   const [users, setUsers] = useState([]);
-  const [readNews, setReadNews] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [combinedNews, setCombinedNews] = useState([]);
   const [languageCounts, setLanguageCounts] = useState({
@@ -60,95 +63,32 @@ const Publishednews = () => {
     fetchToken();
   }, []);
   
-
+  // Fetch all data
   const fetchAllData = async () => {
-    //fetching all news
-    const fetchNews = async () => {
-      // const token = '666ab2a5be8ee1.66302861';
+    //fetching articles from knowledge base
+    const fetchKnowledgebase = async () => {
+      const token = '666ab2a5be8ee1.66302861';
       try {
         const response = await axios.get(
-          '/api/index.php/rest/photographer_portal/news',
-          {
+          "/api/index.php/rest/knowledgebase/articles", {
             headers: {
               Authorization: `Admin ${token}`,
-              'Content-Type': 'application/json',
             },
           }
         );
-        console.log('Fetched news:', response.data.result);
-        setNews(response.data.result);
-      } catch (error) {
-        console.error('Error fetching news:', error);
+        console.log("response", response.data.result);
+        setKnowledgeBase(response.data.result)
+      } catch (err) {
+        console.error("Error fetching data:", err);
       }
     };
-    //fetching all users
-    const fetchUsers = async () => {
-      // const token = '666ab2a5be8ee1.66302861';
-      try {
-        const responseUsers = await axios.get(
-          '/api/index.php/rest/photographer_portal/users',
-          {
-            headers: {
-              Authorization: `Admin ${token}`,
-              'Content-Type': 'application/json',
-            },
-          }
-        );
-        console.log('Fetched users:', responseUsers.data.result);
-        setUsers(responseUsers.data.result);
-      } catch (error) {
-        console.error('Error fetching users:', error);
-      }
-    };
-
-    //fetching all read post
-    const fetchReadAllNews = async () => {
-      // const token = '666ab2a5be8ee1.66302861';
-      try {
-        const responseRead = await axios.get(
-          '/api/index.php/rest/photographer_portal/newsread',
-          {
-            headers: {
-              Authorization: `Admin ${token}`,
-              'Content-Type': 'application/json',
-            },
-          }
-        );
-        console.log('Fetched read-news:', responseRead.data.result);
-        setReadNews(responseRead.data.result);
-      } catch (error) {
-        console.error('Error fetching read-news:', error);
-      }
-    };
-    await Promise.all([fetchNews(), fetchUsers(), fetchReadAllNews()]);
-
+    await Promise.all([fetchKnowledgebase()]);
   };
 
   useEffect(() => {
     fetchAllData();
   }, [token]);
 
-  useEffect(() => {
-    // Merge arrays
-    const mergeNewsIntoReadNews = () => {
-      const newsToAdd = news.filter((newsItem) => {
-        const exists = readNews.some(
-          (readItem) => readItem.news.id === newsItem.id
-        );
-        return !exists;
-      });
-
-      // Append filtered news items to readNews
-      const updatedReadNews = [
-        ...readNews,
-        ...newsToAdd.map((item) => ({ news: { ...item }, read_by: [] })),
-      ];
-      setCombinedNews(updatedReadNews);
-      console.log('Combines news array:', updatedReadNews);
-    };
-
-    mergeNewsIntoReadNews();
-  }, [news, readNews]);
 
   useEffect(() => {
     const countSumCountries = () => {
@@ -213,7 +153,7 @@ const Publishednews = () => {
   //delete news from database
   const deleteNews = async (id) => {
     console.log('deleted news id:', id);
-    // const token = '666ab2a5be8ee1.66302861';
+    const token = '666ab2a5be8ee1.66302861';
     try {
       const responseDelete = await axios.delete(
         `/api/index.php/rest/photographer_portal/news/${id}`,
@@ -236,18 +176,17 @@ const Publishednews = () => {
   };
 
   const navigateToNewsdetails = (item) => {
-    console.log('navigate to page:', item.news.id);
+    console.log('navigate to page:', item.id);
     // navigate(`/newsdetails/${item.news.id}`, { state: { item } });
-
-    navigate(`/newsdetails/${item.news.id}/?token=${token}`, { state: { item } });
+    navigate(`/newsdetails/${item.id}/?token=${token}`, { state: { item } });
 
   };
 
   return (
     <div className="page-wrapper table-responsive">
-       <div className='header-box d-flex justify-content-between' style={{ height: "5em" }}>
+      <div className='header-box d-flex justify-content-between' style={{ height: "5em" }}>
             <h6 className="mb-4">
-                <b>Published News:</b>
+                <b>Knowledge Base:</b>
             </h6>
             <button className='new-article-button' onClick={() => setShowModal(true)}>
                 <FontAwesomeIcon icon={faPlus} className='mr-1'/>
@@ -257,70 +196,67 @@ const Publishednews = () => {
       <table className="table ">
         <thead>
           <tr>
-            <th>
+            <th title='Title'>
               <FontAwesomeIcon icon={faT} />
             </th>
-            <th>
+            <th title='Description'>
               <FontAwesomeIcon icon={faAlignJustify} />
             </th>
-            <th>
+            <th title='Files'>
+              <FontAwesomeIcon icon={faFile} />
+            </th>
+            <th title='Created At'>
               <FontAwesomeIcon icon={faClock} />
             </th>
-            <th>
+            <th title='Updated At'>
               <FontAwesomeIcon icon={faPenToSquare} />
             </th>
-            <th>
-              <FontAwesomeIcon icon={faGlasses} />
-            </th>
-            <th>
+            <th title='Selected Countries'>
               <FontAwesomeIcon icon={faGlobeAmericas} />
             </th>
             <th></th>
           </tr>
         </thead>
         <tbody>
-          {combinedNews && combinedNews.length > 0 ? (
-            combinedNews
+          {knowledgeBase && knowledgeBase.length > 0 ? (
+            knowledgeBase
               .slice()
               .sort((a, b) => {
                 // Sorting by created_at in descending order
-                const dateA = new Date(a.news.created_at);
-                const dateB = new Date(b.news.created_at);
+                const dateA = new Date(a.created_at);
+                const dateB = new Date(b.created_at);
                 return dateB - dateA;
               })
               .map((item) => (
                 <tr
-                  key={item.news.id}
+                  key={item.id}
                   className="tr-tbody"
                   onClick={() => navigateToNewsdetails(item)}
                 >
-                  <td title={item.news.title}>{item.news.title}</td>
-                  <td title={item.news.content}>
-                    {item.news.content && item.news.content.length > 40
-                      ? item.news.content.substring(0, 40) + '...'
-                      : item.news.content}
+                  <td title={item.title}>{item.title}</td>
+                  <td title={item.description}>
+                    {item.description && item.description.length > 40
+                      ? item.description.substring(0, 40) + '...'
+                      : item.description}
                   </td>
                   <td>
-                    {item.news.created_at &&
-                      item.news.created_at.substring(0, 10)}
+                    {item.files.map(file => (
+                        file.name
+                    ))}
                   </td>
                   <td>
-                    {item.news.updated_at &&
-                      item.news.updated_at.substring(0, 10)}
-                  </td>
-                  <td style={{ color: 'green' }}>
-                    {item.read_by && item.read_by.length}/
-                    {Array.isArray(item.news.lang) && item.news.lang.length > 0
-                      ? item.news.lang
-                          .map((lang) => languageCounts[lang.trim()])
-                          .reduce((a, b) => a + b, 0)
-                      : '0'}
+                    {item.created_at &&
+                      item.created_at.substring(0, 10)}
                   </td>
                   <td>
-                    {Array.isArray(item.news.lang)
-                      ? item.news.lang.join(', ')
-                      : typeof item.news.lang === 'string'
-                        ? item.news.lang
+                    {item.updated_at &&
+                      item.updated_at.substring(0, 10)}
+                  </td>
+                  <td>
+                    {Array.isArray(item.langs)
+                      ? item.langs.join(', ')
+                      : typeof item.langs === 'string'
+                        ? item.langs
                         : ''}
                   </td>
 
@@ -330,7 +266,7 @@ const Publishednews = () => {
                       icon={faTrashAlt}
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleDeleteClick(item.news.id);
+                        handleDeleteClick(item.id);
                       }}
                     />
                   </td>
@@ -338,14 +274,14 @@ const Publishednews = () => {
               ))
           ) : (
             <tr>
-              <td colSpan="2">No published news.</td>
+              <td colSpan="2">There are no published articles in Knowlege Base.</td>
             </tr>
           )}
         </tbody>
       </table>
 
       {/* <Newpostbutton onClick={handleOpenModal} /> */}
-      <Newpostmodal
+      <Newpostknowledgebasemodal
         show={showModal}
         handleClose={handleCloseModal}
         refreshData={fetchAllData}
@@ -354,4 +290,4 @@ const Publishednews = () => {
   );
 };
 
-export default Publishednews;
+export default Knowledgebase;

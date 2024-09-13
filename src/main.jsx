@@ -8,7 +8,7 @@ import Header from './components/header.jsx';
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <Router>
-      <Header /> {/* Render the Header component */}
+      <Header />
       <App />
     </Router>
   </React.StrictMode>

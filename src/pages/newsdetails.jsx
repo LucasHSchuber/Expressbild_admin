@@ -13,6 +13,8 @@ import {
 
 import Editpostmodal from '../components/editpostmodal';
 
+import '../assets/css/global.css';
+
 const Newsdetails = () => {
 
   const navigate = useNavigate();

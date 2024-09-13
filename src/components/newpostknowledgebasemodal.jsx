@@ -60,24 +60,24 @@ const Newpostmodal = ({ show, handleClose, refreshData }) => {
   const handleSubmitPost = async (post) => {
     console.log('Post submitted:', post);
     const token = '666ab2a5be8ee1.66302861';
-    try {
-      const response = await axios.post(
-        '/api/index.php/rest/photographer_portal/news',
-        post,
-        {
-          headers: {
-            Authorization: `Admin ${token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-      console.log('Post news response:', response);
-      refreshData();
-      setSelectedLanguages([]);
-      setEditorHtml('');
-    } catch (error) {
-      console.error('Error posting news:', error);
-    }
+    // try {
+    //   const response = await axios.post(
+    //     '/api/index.php/rest/photographer_portal/news',
+    //     post,
+    //     {
+    //       headers: {
+    //         Authorization: `Admin ${token}`,
+    //         'Content-Type': 'application/json',
+    //       },
+    //     }
+    //   );
+    //   console.log('Post news response:', response);
+    //   refreshData();
+    //   setSelectedLanguages([]);
+    //   setEditorHtml('');
+    // } catch (error) {
+    //   console.error('Error posting news:', error);
+    // }
   };
 
   //handle checkbox change
@@ -103,12 +103,23 @@ const Newpostmodal = ({ show, handleClose, refreshData }) => {
     }
   };
 
+  const handleFileChange = (file) => {
+    if (file) {
+        console.log('Selected file:', file);
+        console.log('File name:', file.name);
+        console.log('File size:', file.size);
+        console.log('File type:', file.type);
+    } else {
+        console.log('No file selected.');
+    }
+  }
+
   
   return (
     <div className="modal-overlay">
       <div className="modal-content">
         <div className='d-flex justify-content-between'>
-          <h5 className="mb-3">News: Create new article</h5>
+          <h5 className="mb-3">Knowledge Base: Create new article</h5>
           <h6 
             className='closemodal-button'
             onClick={handleClose}
@@ -131,33 +142,9 @@ const Newpostmodal = ({ show, handleClose, refreshData }) => {
               />
             </div>
           </div>
-          {/* <div className="mb-2">
-            <div>
-              <label>Content</label>
-            </div>
-            <div>
-              <textarea
-                style={{ marginTop: '-0.5em', width: '20em' }}
-                className="form-textarea"
-                name="content"
-                required
-              ></textarea>
-            </div>
-          </div> */}
-          {/* <div>
-            <label className="mr-2">Publish to:</label>
-            <select className="form-select" name="language" required>
-              <option value="All">All countries</option>
-              <option value="DK">Denmark</option>
-              <option value="DE">Germany</option>
-              <option value="NO">Norway</option>
-              <option value="FI">Finland</option>
-              <option value="SE">Sweden</option>
-            </select>
-          </div> */}
           <div>
             <div>
-              <label>Content:</label>
+              <label>Description:</label>
             </div>
             <div>
               <ReactQuill
@@ -171,12 +158,19 @@ const Newpostmodal = ({ show, handleClose, refreshData }) => {
               />
             </div>
           </div>
+          <div className='my-4'>
+            <input 
+                type='file'
+                onChange={(e) => handleFileChange(e.target.files[0])}
+            >
+            </input>
+          </div>
           <div>
             <label>Publish to:</label>
             <div className="checkbox-container">
               <label>
                 <input
-                  className={`${errorBoarderLang ? 'checkbox-error-border' : ''}`}
+                  className={`checkbox-all ${errorBoarderLang ? 'checkbox-error-border' : ''}`}
                   type="checkbox"
                   name="categories"
                   value="All"
