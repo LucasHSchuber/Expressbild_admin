@@ -175,10 +175,10 @@ const Knowledgebase = () => {
     }
   };
 
-  const navigateToNewsdetails = (item) => {
+  const navigateToKnowledgedetails = (item) => {
     console.log('navigate to page:', item.id);
     // navigate(`/newsdetails/${item.news.id}`, { state: { item } });
-    navigate(`/newsdetails/${item.id}/?token=${token}`, { state: { item } });
+    navigate(`/knowledgedetails/${item.id}/?token=${token}`, { state: { item } });
 
   };
 
@@ -231,7 +231,7 @@ const Knowledgebase = () => {
                 <tr
                   key={item.id}
                   className="tr-tbody"
-                  onClick={() => navigateToNewsdetails(item)}
+                  onClick={() => navigateToKnowledgedetails(item)}
                 >
                   <td title={item.title}>{item.title}</td>
                   <td title={item.description}>
@@ -259,7 +259,6 @@ const Knowledgebase = () => {
                         ? item.langs
                         : ''}
                   </td>
-
                   <td>
                     <FontAwesomeIcon
                       className="delete-table"
