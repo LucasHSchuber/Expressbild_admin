@@ -251,7 +251,7 @@ const Publishednews = () => {
             </h6>
             <button className='new-article-button' onClick={() => setShowModal(true)}>
                 <FontAwesomeIcon icon={faPlus} className='mr-1'/>
-                New Article
+                Add News
             </button>
       </div>
       <table className="table ">

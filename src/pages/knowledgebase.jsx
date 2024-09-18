@@ -6,6 +6,9 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Newpostbutton from '../components/newpostbutton';
 import Newpostknowledgebasemodal from '../components/newpostknowledgebasemodal';
 
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faT,
@@ -16,12 +19,14 @@ import {
   faGlobeAmericas,
   faTrashAlt,
   faPlus,
-  faFile
+  faFile,
+  faTag
 } from '@fortawesome/free-solid-svg-icons';
 
 import '../assets/css/main_knowledgebase.css';
 import '../assets/css/global.css';
 
+import fetchTags from "../assets/js/fetchTags.js"
 
 
 
@@ -40,9 +45,41 @@ const Knowledgebase = () => {
     NO: 0,
   });
   const [token, setToken] = useState("");
-
+  const [tags, setTags] = useState([]);
 
   const navigate = useNavigate();
+
+
+ 
+  const fetchData = async () => {
+    try {
+    const response = await fetch('http://localhost:3003/api/articles');
+    
+    if (!response.ok) {
+        throw new Error('Network response was not ok');
+    }
+    const data = await response.json();
+    console.log('Fetched data:', data);
+    setKnowledgeBase(data)
+    getTags();
+    } catch (error) {
+    console.log('error:', error);
+    }
+  };
+
+  const getTags = async () => {
+    const fetchedTags = await fetchTags();
+    setTags(fetchedTags); 
+  console.log('fetchedTags', fetchedTags);
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [token]);
+
+
+  
+
 
 
   // Fetch token from URL query parameters
@@ -63,31 +100,7 @@ const Knowledgebase = () => {
     fetchToken();
   }, []);
   
-  // Fetch all data
-  const fetchAllData = async () => {
-    //fetching articles from knowledge base
-    const fetchKnowledgebase = async () => {
-      const token = '666ab2a5be8ee1.66302861';
-      try {
-        const response = await axios.get(
-          "/api/index.php/rest/knowledgebase/articles", {
-            headers: {
-              Authorization: `Admin ${token}`,
-            },
-          }
-        );
-        console.log("response", response.data.result);
-        setKnowledgeBase(response.data.result)
-      } catch (err) {
-        console.error("Error fetching data:", err);
-      }
-    };
-    await Promise.all([fetchKnowledgebase()]);
-  };
-
-  useEffect(() => {
-    fetchAllData();
-  }, [token]);
+  
 
 
   useEffect(() => {
@@ -141,44 +154,56 @@ const Knowledgebase = () => {
   };
 
   //delete confrim
-  const handleDeleteClick = (newsId) => {
+  const handleDeleteClick = (id) => {
     const userConfirmed = window.confirm(
-      'Are you sure you want to delete this news item?'
+      'Are you sure you want to delete this article?'
     );
     if (userConfirmed) {
-      deleteNews(newsId);
+      deleteArticle(id);
     }
   };
 
   //delete news from database
-  const deleteNews = async (id) => {
-    console.log('deleted news id:', id);
+  const deleteArticle = async (id) => {
+    console.log('deleted article id:', id);
     const token = '666ab2a5be8ee1.66302861';
     try {
-      const responseDelete = await axios.delete(
-        `/api/index.php/rest/photographer_portal/news/${id}`,
-        {
-          headers: {
+      const responseDelete = await fetch(`http://localhost:3003/api/articles/${id}`, {
+            method: 'DELETE',
+            headers: {
             Authorization: `Admin ${token}`,
-          },
+            'Content-Type': 'application/json',
+            },
         }
       );
-      console.log('Response news deleted:', responseDelete);
-      if (responseDelete.status === 200 || responseDelete.status === 201) {
-        console.log('Response news deleted:', responseDelete.data.result);
-        fetchAllData();
+        // Check if response is ok
+      if (!responseDelete.ok) {
+        throw new Error('Network response was not ok');
+      }
+      const result = await responseDelete.json();
+      console.log('Article deletion result:', result);
+    //   fetchData()
+      
+      console.log('Response article deleted:', responseDelete);
+      if (result.status === 200) {
+        console.log('Article marked as deleted successfully');
+        fetchData()
+    
+        console.log('Showing success toast');
       } else {
-        console.log('Error deleting news');
+        console.log('Error deleting article');
       }
     } catch (error) {
-      console.error('Error deleting news:', error);
+      console.error('Error deleting article:', error);
+      toast.error('Error deleting article');
     }
   };
 
   const navigateToKnowledgedetails = (item) => {
     console.log('navigate to page:', item.id);
+    let itemId = item.id;
     // navigate(`/newsdetails/${item.news.id}`, { state: { item } });
-    navigate(`/knowledgedetails/${item.id}/?token=${token}`, { state: { item } });
+    navigate(`/knowledgedetails/${item.id}/?token=${token}`, { state: { itemId } });
 
   };
 
@@ -204,6 +229,9 @@ const Knowledgebase = () => {
             </th>
             <th title='Files'>
               <FontAwesomeIcon icon={faFile} />
+            </th>
+            <th title='Tags'>
+              <FontAwesomeIcon icon={faTag} />
             </th>
             <th title='Created At'>
               <FontAwesomeIcon icon={faClock} />
@@ -233,23 +261,28 @@ const Knowledgebase = () => {
                   className="tr-tbody"
                   onClick={() => navigateToKnowledgedetails(item)}
                 >
-                  <td title={item.title}>{item.title}</td>
+                  <td title={item.title}>{item.title && item.title}</td>
                   <td title={item.description}>
                     {item.description && item.description.length > 40
                       ? item.description.substring(0, 40) + '...'
                       : item.description}
                   </td>
                   <td>
-                    {item.files.map(file => (
-                        file.name
+                    {item.files && item.files.map(file => (
+                        <p><i>{file.name}</i></p>
                     ))}
                   </td>
                   <td>
-                    {item.created_at &&
+                    {item.tags && item.tags.map(tag => (
+                        tag
+                    ))}
+                  </td>
+                  <td>
+                    {item.created_at && item.created_at &&
                       item.created_at.substring(0, 10)}
                   </td>
                   <td>
-                    {item.updated_at &&
+                    {item.updated_at && item.updated_at &&
                       item.updated_at.substring(0, 10)}
                   </td>
                   <td>
@@ -283,8 +316,26 @@ const Knowledgebase = () => {
       <Newpostknowledgebasemodal
         show={showModal}
         handleClose={handleCloseModal}
-        refreshData={fetchAllData}
+        refreshData={fetchData}
+        tags={tags}
+        
       />
+
+        <ToastContainer 
+				position="bottom-left"
+				autoClose={3000}
+				hideProgressBar={false}
+				// transition={Slide}
+				newestOnTop={false}
+				closeOnClick
+				rtl={false}
+				pauseOnFocusLoss
+				draggable
+				pauseOnHover
+				theme="colored"
+				style={{ fontSize: '15px', height: "3em", width: "18em", margin: "0 0 3em 0" }}
+		/>
+
     </div>
   );
 };

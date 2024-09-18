@@ -176,7 +176,7 @@ const Newpostmodal = ({ show, handleClose, refreshData }) => {
             <div className="checkbox-container">
               <label>
                 <input
-                  className={`${errorBoarderLang ? 'checkbox-error-border' : ''}`}
+                  className={`checkbox-all ${errorBoarderLang ? 'checkbox-error-border' : ''}`}
                   type="checkbox"
                   name="categories"
                   value="All"

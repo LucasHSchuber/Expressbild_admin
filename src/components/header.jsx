@@ -16,7 +16,7 @@ const Header = () => {
           </li>
           <li>
             <Link to="/recentshot" className="navlink">
-              Recent shot
+              Recent Shot
             </Link>
           </li>
           <li>
