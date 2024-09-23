@@ -33,6 +33,8 @@ import fetchTags from "../assets/js/fetchTags.js"
 
 const Knowledgebase = () => {
   //define states   
+  const [loading, setLoading] = useState(false);
+
   const [knowledgeBase, setKnowledgeBase] = useState([]);
   const [users, setUsers] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -52,6 +54,7 @@ const Knowledgebase = () => {
 
  
   const fetchData = async () => {
+    setLoading(true);
     try {
     const response = await fetch('http://localhost:3003/api/articles');
     
@@ -64,12 +67,14 @@ const Knowledgebase = () => {
     getTags();
     } catch (error) {
     console.log('error:', error);
+    setLoading(false);
     }
   };
 
   const getTags = async () => {
     const fetchedTags = await fetchTags();
     setTags(fetchedTags); 
+    setLoading(false);
   console.log('fetchedTags', fetchedTags);
   };
 
@@ -181,21 +186,17 @@ const Knowledgebase = () => {
         throw new Error('Network response was not ok');
       }
       const result = await responseDelete.json();
-      console.log('Article deletion result:', result);
-    //   fetchData()
-      
-      console.log('Response article deleted:', responseDelete);
+      console.log('Article deletion result:', result);    
       if (result.status === 200) {
         console.log('Article marked as deleted successfully');
         fetchData()
-    
-        console.log('Showing success toast');
+        toast.success('Article was deleted');
       } else {
         console.log('Error deleting article');
       }
     } catch (error) {
       console.error('Error deleting article:', error);
-      toast.error('Error deleting article');
+      toast.success('Error deleting article');
     }
   };
 
@@ -246,7 +247,11 @@ const Knowledgebase = () => {
           </tr>
         </thead>
         <tbody>
-          {knowledgeBase && knowledgeBase.length > 0 ? (
+          { loading ? (
+            <tr>
+              <td colSpan="2">Loading Articles in Knowledge Base...</td>
+            </tr>
+          ) : knowledgeBase && knowledgeBase.length > 0 ? (
             knowledgeBase
               .slice()
               .sort((a, b) => {
@@ -268,14 +273,19 @@ const Knowledgebase = () => {
                       : item.description}
                   </td>
                   <td>
-                    {item.files && item.files.map(file => (
-                        <p><i>{file.name}</i></p>
-                    ))}
+                    {item.files && item.files.length > 0 ? item.files.map(file => (
+                        <p key={item.id + file.name}><i>{file?.name}</i></p>
+                    )) : <p><i>None</i></p> }
                   </td>
                   <td>
-                    {item.tags && item.tags.map(tag => (
-                        tag
-                    ))}
+                    {/* {item.tags && item.tags.map(tag => (
+                        tag.join
+                    ))} */}
+                    {Array.isArray(item.tags)
+                      ? item.tags.join(', ')
+                      : typeof item.tags === 'string'
+                        ? item.tags
+                        : ''}
                   </td>
                   <td>
                     {item.created_at && item.created_at &&
@@ -309,6 +319,7 @@ const Knowledgebase = () => {
               <td colSpan="2">There are no published articles in Knowlege Base.</td>
             </tr>
           )}
+
         </tbody>
       </table>
 

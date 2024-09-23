@@ -4,7 +4,7 @@ import axios from 'axios';
 import React, { useEffect, useState, useRef } from 'react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus, faMinus, faTrash, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faMinus, faTrash, faTimes, faUpload, faPenNib } from '@fortawesome/free-solid-svg-icons';
 
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -17,7 +17,8 @@ const Editpostknowledgebasemodal = ({ show, handleClose, handleSubmit, item, ref
 
   //define states
   const [title, setTitle] = useState(item.title);
-  const [tags, setTags] = useState(item.description);
+  const [tags, setTags] = useState([]);
+  // const [tagsNewArray, setTagsNewArray] = useState([]);
   const [description, setDescription] = useState(item.description);
   const [file, setFile] = useState([]);
   const fileInputRef = useRef(null);
@@ -33,6 +34,7 @@ const Editpostknowledgebasemodal = ({ show, handleClose, handleSubmit, item, ref
   const [openNewTag, setOpenNewTag] = useState(false);
 //   const [selectedTag, setSelectedTag] = useState('');
   const [newTag, setNewTag] = useState('');
+  const [newTagSelect, setNewTagSelect] = useState('');
 
 
   useEffect(() => {
@@ -42,7 +44,7 @@ const Editpostknowledgebasemodal = ({ show, handleClose, handleSubmit, item, ref
   useEffect(() => {
     console.log("item:",item)
     setTitle(item.title);
-    setTags(item.tags[0]);
+    setTags(item.tags);
     setFile(item?.files);
     setDescription(item.description);
     const initialLanguages = Array.isArray(item.langs)
@@ -57,23 +59,15 @@ const Editpostknowledgebasemodal = ({ show, handleClose, handleSubmit, item, ref
   const submitForm = async (event) => {
     event.preventDefault();
 
-    // const data = {
-    //     title: title,
-    //     description: description,
-    //     tags: newTag !== "" ? newTag : tags,
-    //     langs: selectedLanguages,
-    //     deletedFiles: deleteFileArray,
-    //     uploadedFiles: uploadedFile
-    // }
-    // console.log('data', data);
-    // console.log('id', item.id);
     const formData = new FormData();
     formData.append('title', title);
     formData.append('description', description);
-    formData.append('tags', newTag !== "" ? newTag : tags);
+    // formData.append('tags', newTag !== "" ? newTag : tags);
+    formData.append('tags', tags.join(", "));
     formData.append('langs', JSON.stringify(selectedLanguages));
     formData.append('deletedFiles', JSON.stringify(deleteFileArray)); 
 
+    console.log('tags joined', tags.join(", "));
     console.log("Deleted Files:", deleteFileArray);
 
     // Append each file to FormData
@@ -99,7 +93,15 @@ const Editpostknowledgebasemodal = ({ show, handleClose, handleSubmit, item, ref
             },
             body: formData,  
         });
-        console.log('Update response:', response);
+        const data = await response.json();
+        console.log('response', response);
+        console.log('data', data);
+    
+          if (data.status = 502){
+            console.log("File Duplicate exists in database");
+            toast.error(data.error);
+          }
+        
 
         if (response.status === 200){
           refreshData();
@@ -149,8 +151,8 @@ if (value === 'All') {
 
 
   const handleSelectChange = (event) => {
-    console.log('event.target.value', event.target.value);
-    setTags(event.target.value);
+    console.log('select tag', event.target.value);
+    setNewTagSelect(event.target.value);
 };
 
 const handleNewTagChange = (event) => {
@@ -183,10 +185,23 @@ const handleFileChange = (file) => {
 };
 
 
-useEffect(() => {
-  console.log('deleteFileArray', deleteFileArray);
-  console.log('uploadedFile', uploadedFile);
-}, [deleteFileArray, uploadedFile]);
+  useEffect(() => {
+    console.log('deleteFileArray', deleteFileArray);
+    console.log('uploadedFile', uploadedFile);
+  }, [deleteFileArray, uploadedFile]);
+
+
+
+  const addTag = (tag) => {
+    console.log('tag', tag);
+    if (tag !== "" && !tags.includes(tag)){
+    setTags((prevArray) => [...prevArray, tag]);
+    setNewTag("");
+    }  else {
+      console.log('Tag already exists or is empty');
+    }
+  };
+
 
 
 
@@ -205,7 +220,7 @@ useEffect(() => {
         <form onSubmit={submitForm}>
           <div className="mb-2">
             <div>
-              <label>Title:</label>
+              <label><b>Title:</b></label>
             </div>
             <div>
               <input
@@ -221,7 +236,7 @@ useEffect(() => {
           </div>
           <div>
             <div>
-              <label>Description:</label>
+              <label><b>Description:</b></label>
             </div>
             <div>
               <textarea
@@ -234,16 +249,16 @@ useEffect(() => {
               />
             </div>
           </div>
-          <div className='my-4 d-flex justify-content-between'>
+          <div className='mt-4 mb-2 d-flex justify-content-between'>
             <div>
-                <label htmlFor="tag-select">Tag:</label>
+                <label htmlFor="tag-select"><b>Tag:</b></label>
                 <select
                     className='mx-2 form-select'
                     id="tag-select"
                     name='tag'
-                    value={tags}
+                    value={newTagSelect}
                     onChange={handleSelectChange}
-                    required={newTag.trim() === ""}
+                    // required={newTag.trim() === ""}
                 >
                     <option value="">Select a tag</option>
                     {tagsArray.map((tag, index) => (
@@ -252,26 +267,41 @@ useEffect(() => {
                         </option>
                     ))}
                 </select>
-                <button className='standard' title='Create New Tag'  type="button"  onClick={() => setOpenNewTag(!openNewTag)}> {!openNewTag ? <FontAwesomeIcon icon={faPlus} /> : <FontAwesomeIcon icon={faMinus} /> } </button>
+                <button className='standard add-button' title='Add Tag'  type="button"   onClick={() => addTag(newTagSelect)}> <FontAwesomeIcon icon={faPlus} /> </button>
+                <button className='standard add-button' title='Create New Tag'  type="button" onClick={() => setOpenNewTag(!openNewTag)} > <FontAwesomeIcon  icon={faPenNib} /> </button>
             </div>
-                {openNewTag && (
-                <div className='mr-5'>
-                    <label htmlFor="new-tag">New tag:</label>
-                    <input
-                        style={{ width: "10em" }}
-                        className='mx-2'
-                        id="new-tag"
-                        type="text"
-                        value={newTag}
-                        onChange={handleNewTagChange} 
-                    />
-                    {/* <button onClick={handleAddTag}>Add Tag</button> */}
-                </div>
-                )}
+            {openNewTag && (
+            <div className=''>
+                <label htmlFor="new-tag">New tag:</label>
+                <input
+                    style={{ width: "10em" }}
+                    className='mx-2'
+                    id="new-tag"
+                    type="text"
+                    value={newTag}
+                    onChange={handleNewTagChange} 
+                />
+                <button className='standard add-button' title='Add Tag'  type="button"   onClick={() => addTag(newTag)}> <FontAwesomeIcon icon={faPlus} /> </button>
+            </div>
+            )}
           </div>
-          <div className='my-5'>
+          <div className='mb-4'>
+            {tags.length > 0 && (
+              <div className='ml-2'>
+              {/* <h6><b>Tags:</b></h6> */}
+                {tags.map((tag, index) => (
+                  <div key={index}>
+                    {index + 1}. {" "} {tag}
+                    <FontAwesomeIcon title='Delete Tag' className='delete-icon ml-2' icon={faTrash} onClick={() => setTags(prevArray => prevArray.filter(f => f !== tag))} />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          <hr></hr>
+          <div className='mt-2 mb-2'>
                 <div className='d-flex'>
-                    <p className='mr-2'>Files:  </p>
+                    <p className='mr-2'><b>Files:</b></p>
                     <div>
                       <div className='ml-5'>
                         {file.map((file, index) => (
@@ -286,7 +316,20 @@ useEffect(() => {
                     </div>
                 </div>
               {/* } */}
-                <input 
+                  {uploadedFile.length > 0 && (
+                  <div className='d-flex mt-2'>              
+                    <h6 className='mr-2'>New Files:</h6>
+                    <div className='ml-3'>
+                      {uploadedFile.length > 0 && uploadedFile.map((file, index) => (
+                        <div key={index} className='d-flex'>
+                          <h6><i>{file.name}</i></h6>
+                          <FontAwesomeIcon title='Delete File' className='delete-icon ml-2' icon={faTrash} onClick={() => setUploadedFile(prevFiles => prevFiles.filter(f => f.name !== file.name))} />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  )}
+                  <input 
                     className='hidden-file-input'
                     type='file'
                     id='file-input'
@@ -295,27 +338,16 @@ useEffect(() => {
                   >
                   </input>
                   <label htmlFor="file-input" 
-                    className={`mt-1 mb-3 custom-file-button`}
+                    className={`mt-1 custom-file-button`}
                     >
-                        Add New File
+                        {/* Add File */}
+                        <FontAwesomeIcon title='Upload File' icon={faUpload} />
                   </label>
-                  {uploadedFile.length > 0 && (
-                  <div className='d-flex '>              
-                    <h6 className='mr-2'>New Files:</h6>
-                    <div className='ml-3'>
-                      {uploadedFile.length > 0 && uploadedFile.map((file, index) => (
-                        <div key={index} className='d-flex'>
-                          <h6><i>{file.name}</i></h6>
-                          <FontAwesomeIcon title='Delete File' style={{ margin: "0.2em 0 0 1em ", fontSize: "0.9em" }} icon={faTrash} onClick={() => setUploadedFile(prevFiles => prevFiles.filter(f => f.name !== file.name))} />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  )}
                   {/* <FontAwesomeIcon title='Add New File' icon={faPlus} /> */}
           </div>
+          <hr></hr>
           <div>
-            <label>Publish to:</label>
+            <label><b>Publish to:</b></label>
             <div className="checkbox-container">
               <div>
                 <label>

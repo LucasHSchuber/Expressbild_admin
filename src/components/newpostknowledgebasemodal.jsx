@@ -4,11 +4,10 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTimes, faPlus, faMinus, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faTimes, faPlus, faMinus, faTrash, faUpload, faPenNib } from '@fortawesome/free-solid-svg-icons';
 
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
 
 import '../assets/css/components.css';
 
@@ -16,6 +15,7 @@ const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
   //define states
   const [selectedLanguages, setSelectedLanguages] = useState([]);
   const [file, setFile] = useState([]);
+  const [tagsArray, setTagsArray] = useState([]);
   const [errorBoarderLang, setErrorBoarderLang] = useState(false);
   const [description, setDescription] = useState('');
 
@@ -35,14 +35,12 @@ const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
   const submitForm = (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
-    const selectedCategories = formData
-      .getAll('categories')
+    const selectedLang = formData
+      .getAll('lang')
       .filter((category) => category !== 'All');
-    const lang = selectedCategories.join(',');
-    if (formData.get('description') === "") {
-      console.log('Missing description');
-      return;
-    }
+    const lang = selectedLang.join(',');
+    const tags = tagsArray.join(", ");
+
     if (formData.get('description') === "") {
       console.log('Missing description');
       return;
@@ -50,6 +48,10 @@ const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
     if (lang === '') {
       console.log('Choose at least one country');
       setErrorBoarderLang(true);
+      return;
+    } 
+    if (tags === '') {
+      console.log('Choose at least one tag');
       return;
     } 
     if (formData.get('tag') === "" && newTag === "") {
@@ -60,11 +62,10 @@ const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
       const post = {
         title: formData.get('title'),
         description: formData.get('description'),
-        tags: formData.get('tag'),
+        tags: tags,
         langs: lang,
       };
       handleSubmitPost(post);
-      
       handleClose();
     }
   };
@@ -78,21 +79,14 @@ const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
         const formData = new FormData();
         formData.append('title', post.title);
         formData.append('description', post.description);
-        if (post.tags && post.tags.trim() !== "") {
-            formData.append('tags', post.tags);
-        } else if (newTag && newTag.trim() !== "") {
-            formData.append('tags', newTag);
-        }
-        formData.append('langs', post.langs);
-
-        // Append files to the FormData
-        // const fileInput = document.querySelector('input[type="file"]');
-        // if (fileInput && fileInput.files.length > 0) {
-        //     for (let i = 0; i < fileInput.files.length; i++) {
-        //         formData.append('files', fileInput.files[i]);
-        //     }
+        // if (post.tags && post.tags.trim() !== "") {
+        //     formData.append('tags', post.tags);
+        // } else if (newTag && newTag.trim() !== "") {
+        //     formData.append('tags', newTag);
         // }
-        // console.log('fileInput.files:', fileInput.files);
+        formData.append('tags', post.tags);
+        formData.append('langs', post.langs);
+      
         if (file.length > 0) {
           for (let i = 0; i < file.length; i++) {
               formData.append('files', file[i]);
@@ -110,11 +104,14 @@ const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
             },
             body: formData, 
         });
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
         const result = await response.json();
+        if (!response.ok) {
+          console.log('Response not ok', response);
+          console.log('Response not ok', result);
+          throw new Error('Network response was not ok');
+        }
         console.log('Article added:', result);
+        setTagsArray([]);
         refreshData();
         
     } catch (error) {
@@ -175,7 +172,19 @@ const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
     };
 
 
-  
+    const addTag = (tag) => {
+      console.log('tag', tag);
+      if (tag !== "" && !tagsArray.includes(tag)){
+      setTagsArray((prevArray) => [...prevArray, tag]);
+      setNewTag("");
+      }  else {
+        console.log('Tag already exists or is empty');
+      }
+    };
+
+
+
+
   return (
     <div className="modal-overlay">
       <div className="modal-content">
@@ -191,7 +200,7 @@ const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
         <form onSubmit={submitForm}>
           <div className="mb-2">
             <div>
-              <label>Title:</label>
+              <label><b>Title:</b></label>
             </div>
             <div>
               <input
@@ -205,7 +214,7 @@ const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
           </div>
           <div>
             <div>
-              <label>Description:</label>
+              <label><b>Description:</b></label>
             </div>
             <div>
               <textarea
@@ -220,7 +229,7 @@ const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
           </div>
           <div className='my-4 d-flex justify-content-between'>
             <div>
-                <label htmlFor="tag-select">Tag:</label>
+                <label htmlFor="tag-select"><b>Tags:</b></label>
                 <select
                     className='mx-2 form-select'
                     id="tag-select"
@@ -236,24 +245,37 @@ const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
                         </option>
                     ))}
                 </select>
-                <button className='standard' title='Create New Tag'  type="button"  onClick={() => setOpenNewTag(!openNewTag)}> {!openNewTag ? <FontAwesomeIcon icon={faPlus} /> : <FontAwesomeIcon icon={faMinus} /> } </button>
-            </div>
-                {openNewTag && (
-                <div className='mr-5'>
-                    <label htmlFor="new-tag">New tag:</label>
-                    <input
-                        style={{ width: "10em" }}
-                        className='mx-2'
-                        id="new-tag"
-                        type="text"
-                        value={newTag}
-                        onChange={handleNewTagChange} 
-                    />
-                    {/* <button onClick={handleAddTag}>Add Tag</button> */}
-                </div>
+                <button className='standard add-button' title='Add Tag'  type="button"  onClick={() => addTag(selectedTag)}> <FontAwesomeIcon icon={faPlus} /> </button>
+                <button className='standard add-button' title='Create New Tag'  type="button"  onClick={() => setOpenNewTag(!openNewTag)}><FontAwesomeIcon  icon={faPenNib} /></button>
+                {tagsArray.length > 0 && (
+                  <div className='ml-2'>
+                  {/* <h6><b>Tags:</b></h6> */}
+                    {tagsArray.map((tag, index) => (
+                      <div key={index}>
+                        {index + 1}. {" "} {tag}
+                        <FontAwesomeIcon title='Delete Tag' className='delete-icon ml-2' icon={faTrash} onClick={() => setTagsArray(prevArray => prevArray.filter(f => f !== tag))} />
+                      </div>
+                    ))}
+                  </div>
                 )}
+            </div>
+            {openNewTag && (
+            <div className=''>
+                <label htmlFor="new-tag">New tag:</label>
+                <input
+                    style={{ width: "10em" }}
+                    className='mx-2'
+                    id="new-tag"
+                    type="text"
+                    value={newTag}
+                    onChange={handleNewTagChange} 
+                />
+                <button className='standard add-button' title='Add Tag'  type="button"  onClick={() => addTag(newTag)}> <FontAwesomeIcon icon={faPlus} /> </button>
+            </div>
+            )}
         </div>
-          <div className='mb-4 mt-5 d-flex'>
+        <hr></hr>
+          <div className='mb-4 mt-4 '>
             <input 
               className='hidden-file-input'
                 type='file'
@@ -261,32 +283,34 @@ const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
                 onChange={(e) => handleFileChange(e.target.files[0])}
             >
             </input>
-            <label>Files:</label>
+            <label><b>Files:</b></label>
             <label htmlFor="file-input" 
               className={`ml-2 custom-file-button`}
               >
-                  Choose File
+                {/* Upload */}
+                <FontAwesomeIcon title='Upload File' icon={faUpload} />
             </label>
             {file.length > 0 && (
-            <div className='ml-5' style={{ width: "20em" }}>              
-              <h6><b>Files:</b></h6>
+            <div className='ml-2' style={{ width: "20em" }}>              
+              {/* <h6><b>Files:</b></h6> */}
               {file.length > 0 && file.map((file, index) => (
                 <div key={index} className='d-flex'>
                   <h6>{index + 1}. {" "} {file.name}</h6>
-                  <FontAwesomeIcon title='Delete File' style={{ margin: "0.2em 0 0 1em ", fontSize: "0.9em" }} icon={faTrash} onClick={() => setFile(prevFiles => prevFiles.filter(f => f.name !== file.name))} />
+                  <FontAwesomeIcon title='Delete File' className='delete-icon ml-2' icon={faTrash} onClick={() => setFile(prevFiles => prevFiles.filter(f => f.name !== file.name))} />
                 </div>
                ))}
             </div>
             )}
           </div>
+          <hr></hr>
           <div>
-            <label>Publish to:</label>
+            <label><b>Publish to:</b></label>
             <div className="checkbox-container">
               <label>
                 <input
                   className={`checkbox-all ${errorBoarderLang ? 'checkbox-error-border' : ''}`}
                   type="checkbox"
-                  name="categories"
+                  name="lang"
                   value="All"
                   checked={selectedLanguages.includes('All')}
                   onChange={handleCheckboxChange}
@@ -299,7 +323,7 @@ const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
                   <input
                     className={`${errorBoarderLang ? 'checkbox-error-border' : ''}`}
                     type="checkbox"
-                    name="categories"
+                    name="lang"
                     value="DK"
                     checked={selectedLanguages.includes('DK')}
                     onChange={handleCheckboxChange}
@@ -311,7 +335,7 @@ const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
                   <input
                     className={`${errorBoarderLang ? 'checkbox-error-border' : ''}`}
                     type="checkbox"
-                    name="categories"
+                    name="lang"
                     value="DE"
                     checked={selectedLanguages.includes('DE')}
                     onChange={handleCheckboxChange}
@@ -323,7 +347,7 @@ const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
                   <input
                     className={`${errorBoarderLang ? 'checkbox-error-border' : ''}`}
                     type="checkbox"
-                    name="categories"
+                    name="lang"
                     value="NO"
                     checked={selectedLanguages.includes('NO')}
                     onChange={handleCheckboxChange}
@@ -335,7 +359,7 @@ const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
                   <input
                     className={`${errorBoarderLang ? 'checkbox-error-border' : ''}`}
                     type="checkbox"
-                    name="categories"
+                    name="lang"
                     value="FI"
                     checked={selectedLanguages.includes('FI')}
                     onChange={handleCheckboxChange}
@@ -347,7 +371,7 @@ const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
                   <input
                     className={`${errorBoarderLang ? 'checkbox-error-border' : ''}`}
                     type="checkbox"
-                    name="categories"
+                    name="lang"
                     value="SE"
                     checked={selectedLanguages.includes('SE')}
                     onChange={handleCheckboxChange}
@@ -357,7 +381,7 @@ const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
               </div>
             </div>
           </div>
-          <div className="mt-3">
+          <div className="mt-4">
             <button
               className="mr-2 button cancel"
               type="button"

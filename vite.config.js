@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 3000,
-    open: true, //open server on port automatically when running "npm run dev"
+    open: true, 
     proxy: {
       '/api': {
         target: 'https://backend.expressbild.org',

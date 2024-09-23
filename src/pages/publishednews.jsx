@@ -23,7 +23,9 @@ import '../assets/css/global.css';
 
 
 const Publishednews = () => {
-  //define states
+  //define state
+  const [loading, setLoading] = useState(false);
+
   const [news, setNews] = useState([]);
   const [users, setUsers] = useState([]);
   const [readNews, setReadNews] = useState([]);
@@ -62,6 +64,7 @@ const Publishednews = () => {
   
 
   const fetchAllData = async () => {
+    setLoading(true);
     //fetching all news
     const fetchNews = async () => {
       // const token = '666ab2a5be8ee1.66302861';
@@ -79,6 +82,7 @@ const Publishednews = () => {
         setNews(response.data.result);
       } catch (error) {
         console.error('Error fetching news:', error);
+        setLoading(false);
       }
     };
     //fetching all users
@@ -98,6 +102,7 @@ const Publishednews = () => {
         setUsers(responseUsers.data.result);
       } catch (error) {
         console.error('Error fetching users:', error);
+        setLoading(false);
       }
     };
 
@@ -118,9 +123,11 @@ const Publishednews = () => {
         setReadNews(responseRead.data.result);
       } catch (error) {
         console.error('Error fetching read-news:', error);
+        setLoading(false);
       }
     };
     await Promise.all([fetchNews(), fetchUsers(), fetchReadAllNews()]);
+    setLoading(false);
 
   };
 
@@ -336,11 +343,15 @@ const Publishednews = () => {
                   </td>
                 </tr>
               ))
-          ) : (
+          ) : (loading) ? (
             <tr>
+              <td colSpan="2">Loading News...</td>
+            </tr>
+          ) : 
+          <tr>
               <td colSpan="2">No published news.</td>
             </tr>
-          )}
+          }
         </tbody>
       </table>
 

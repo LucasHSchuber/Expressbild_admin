@@ -4,11 +4,14 @@ import mysql from 'mysql';
 import cors from 'cors';
 import dbConfig from './dbConfig.js'; 
 import multer from 'multer';
+import zlib from 'zlib';
 
 // Configure multer for in-memory file storage
 const storage = multer.memoryStorage();
-const upload = multer({ storage });
-
+const upload = multer({
+  storage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // Limit to 10 MB
+});
 const app = express();
 const port = 3003;
 
@@ -189,6 +192,7 @@ app.post('/api/articles', upload.array('files'), (req, res) => {
   const files = req.files;
 
   console.log('Files received:', files); 
+  console.log('Tags received:', tags); 
 
   if (!title || !description || !tags || !langs) {
     return res.status(400).json({ error: 'Title, description, tags and files are required.' });
@@ -264,7 +268,7 @@ app.put("/api/articles/:id", upload.array('uploadedFiles'), async (req, res) => 
    // Parse JSON strings in `req.body`
    const parsedDeletedFiles = JSON.parse(deletedFiles || '[]');
 
-   console.log("deletedFiles", parsedDeletedFiles);
+   console.log("deletedFiles Parsed:", parsedDeletedFiles);
    console.log("uploadedFiles", req.files);
 
   if (!title || !description) {
@@ -292,9 +296,17 @@ app.put("/api/articles/:id", upload.array('uploadedFiles'), async (req, res) => 
     await deleteFiles(articleId, parsedDeletedFiles);
   }
 
-   // Handle uploaded files
-   if (req.files && req.files.length > 0) {
-    await addFiles(articleId, req.files);
+  //  // Handle uploaded files
+  //  if (req.files && req.files.length > 0) {
+  //   await addFiles(articleId, req.files);
+  // }
+  // Handle uploaded files
+  if (req.files && req.files.length > 0) {
+    const result = await addFiles(articleId, req.files);
+    if (result.error) {
+      // Send error message for duplicates
+      return res.status(400).json({ error: result.error });
+    } 
   }
 
     // Success response
@@ -304,14 +316,12 @@ app.put("/api/articles/:id", upload.array('uploadedFiles'), async (req, res) => 
     res.status(500).json({ error: 'An error occurred while updating the article.' });
   }
 });
-
 // Function to delete files
 const deleteFiles = async (articleId, deletedFiles) => {
   if (deletedFiles.length === 0) {
     console.log("No files to delete.");
     return;
   }
-
   // Generate the correct number of placeholders for the SQL query
   const placeholders = deletedFiles.map(() => '?').join(',');
   const deleteFilesQuery = `DELETE FROM kb_article_files WHERE article_id = ? AND filename IN (${placeholders})`;
@@ -323,26 +333,68 @@ const deleteFiles = async (articleId, deletedFiles) => {
     throw new Error('An error occurred while deleting files.');
   }
 };
+// Function to add new files
+// const addFiles = async (articleId, uploadedFiles) => {
+//   const insertFilesQuery = 'INSERT INTO kb_article_files (article_id, filename, filepath, created_at) VALUES ?';
 
+//   const fileValues = uploadedFiles.map(file => [
+//     articleId,
+//     file.originalname, 
+//     file.buffer.toString('base64'), 
+//     new Date() 
+//   ]);
+
+//   try {
+//     await executeQuery(insertFilesQuery, [fileValues]);
+//   } catch (error) {
+//     console.error('SQL error:', error);
+//     throw new Error('An error occurred while adding files.');
+//   }
+// };
 // Function to add new files
 const addFiles = async (articleId, uploadedFiles) => {
-  const insertFilesQuery = 'INSERT INTO kb_article_files (article_id, filename, filepath, created_at) VALUES ?';
+  const filenames = uploadedFiles.map(file => file.originalname);
 
-  const fileValues = uploadedFiles.map(file => [
-    articleId,
-    file.originalname, 
-    file.buffer.toString('base64'), 
-    new Date() 
-  ]);
+  // Query to check for existing filenames
+  const placeholders = filenames.map(() => '?').join(',');
+  const checkExistingFilesQuery = `
+    SELECT filename 
+    FROM kb_article_files 
+    WHERE article_id = ? 
+    AND filename IN (${placeholders})
+  `;
 
   try {
+    // Check for existing filenames
+    const existingFiles = await executeQuery(checkExistingFilesQuery, [articleId, ...filenames]);
+    const existingFilenames = existingFiles.map(file => file.filename);
+    console.log("existingFilenames", existingFilenames);
+
+    // Find duplicates
+    const duplicates = filenames.filter(filename => existingFilenames.includes(filename));
+    console.log("duplicates", duplicates);
+    if (existingFiles.length > 0 && duplicates.length > 0) {
+      return { status: 502, error: `Files already exists: ${duplicates.join(', ')}` };
+    }
+
+    // Prepare data for insertion
+    const insertFilesQuery = 'INSERT INTO kb_article_files (article_id, filename, filepath, created_at) VALUES ?';
+    const fileValues = uploadedFiles.map(file => [
+      articleId,
+      file.originalname, 
+      file.buffer.toString('base64'), 
+      new Date() 
+    ]);
+
+    // Insert new files
     await executeQuery(insertFilesQuery, [fileValues]);
+    return { status: 200, message: 'Files added successfully.' };
+  
   } catch (error) {
-    console.error('SQL error:', error);
+    console.error('Error in addFiles:', error);
     throw new Error('An error occurred while adding files.');
   }
 };
-
 // Helper function to execute database queries
 const executeQuery = (query, params) => {
   return new Promise((resolve, reject) => {
@@ -356,7 +408,6 @@ const executeQuery = (query, params) => {
     });
   });
 };
-
 // Function to update tags
 const updateTags = async (articleId, tags) => {
   const tagsArray = tags.split(',').map(tag => tag.trim());
@@ -369,7 +420,6 @@ const updateTags = async (articleId, tags) => {
     await executeQuery(insertTagsQuery, [tagsData]);
   }
 };
-
 // Function to update langs
 const updateLangs = async (articleId, langs) => {
   const deleteLangsQuery = 'DELETE FROM kb_article_langs WHERE article_id = ?';
@@ -399,7 +449,7 @@ app.delete('/api/articles/:id', (req, res) => {
   db.query(updateArticleQuery, [articleId], (error) => {
     if (error) {
       console.error('SQL error:', error);
-      return res.status(500).json({ error: 'An error occurred while updating the article.' });
+      return res.status(500).json({ error: 'An error occurred while deleteing (updating deleted column to NOW) the article.' });
     }
     res.status(200).json({ message: 'Article marked as deleted successfully.', status: 200 });
   });
