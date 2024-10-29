@@ -273,14 +273,11 @@ const Knowledgebase = () => {
                       : item.description}
                   </td>
                   <td>
-                    {item.files && item.files.length > 0 ? item.files.map(file => (
+                    {item.files && item.files.length > 0 && item.files.map(file => (
                         <p key={item.id + file.name}><i>{file?.name}</i></p>
-                    )) : <p><i>None</i></p> }
+                    ))}
                   </td>
                   <td>
-                    {/* {item.tags && item.tags.map(tag => (
-                        tag.join
-                    ))} */}
                     {Array.isArray(item.tags)
                       ? item.tags.join(', ')
                       : typeof item.tags === 'string'

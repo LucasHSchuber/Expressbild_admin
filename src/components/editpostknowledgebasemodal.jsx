@@ -307,8 +307,8 @@ const handleFileChange = (file) => {
                         {file.map((file, index) => (
                           !deleteFileArray.includes(file.name) ? (
                             <div key={index} className='d-flex' style={{ alignItems: 'center', marginBottom: '0.5em' }}>
-                              <p style={{ margin: '0', padding: '0' }}><i>{file.name}</i></p>
-                              <FontAwesomeIcon title='Delete File' style={{ margin: "0 0 0 1em ", fontSize: "0.9em" }} icon={faTrash} onClick={() => deleteFile(file.name)} />
+                              <p style={{ margin: '0', padding: '0' }}><i>{index+1}. {" "}{file.name}</i></p>
+                              <FontAwesomeIcon title='Delete File' className='delete-icon ml-2' icon={faTrash} onClick={() => deleteFile(file.name)} />
                             </div>
                           ) : null
                         ))}
@@ -322,7 +322,7 @@ const handleFileChange = (file) => {
                     <div className='ml-3'>
                       {uploadedFile.length > 0 && uploadedFile.map((file, index) => (
                         <div key={index} className='d-flex'>
-                          <h6><i>{file.name}</i></h6>
+                          <h6><i>{index+1}. {" "} {file.name}</i></h6>
                           <FontAwesomeIcon title='Delete File' className='delete-icon ml-2' icon={faTrash} onClick={() => setUploadedFile(prevFiles => prevFiles.filter(f => f.name !== file.name))} />
                         </div>
                       ))}
@@ -340,10 +340,8 @@ const handleFileChange = (file) => {
                   <label htmlFor="file-input" 
                     className={`mt-1 custom-file-button`}
                     >
-                        {/* Add File */}
                         <FontAwesomeIcon title='Upload File' icon={faUpload} />
                   </label>
-                  {/* <FontAwesomeIcon title='Add New File' icon={faPlus} /> */}
           </div>
           <hr></hr>
           <div>
