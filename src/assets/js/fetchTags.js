@@ -2,7 +2,7 @@
 
 import axios from 'axios';
 
-import ENV from '../../env.js'; 
+import ENV from '../../../env.js'; 
 console.log('ENV', ENV);
 console.log('ENV.API_URL', ENV.API_URL);
 
