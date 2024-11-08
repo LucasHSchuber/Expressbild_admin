@@ -9,7 +9,7 @@ import Header from './components/header.jsx';
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <Router>
-      {/* <Header /> */}
+      <Header />
       <App />
     </Router>
   </React.StrictMode>

@@ -8,13 +8,10 @@ import 'react-quill/dist/quill.snow.css';
 
 import '../assets/css/components.css';
 
-const Editpostmodal = ({
-  show,
-  handleClose,
-  handleSubmit,
-  item,
-  refreshData,
-}) => {
+import useFetchToken from "../assets/js/fetchToken.js"
+
+
+const Editpostmodal = ({ show, handleClose, handleSubmit, item, refreshData }) => {
   if (!show) return null;
 
   //handle change for ReactQuill text-editor
@@ -31,6 +28,12 @@ const Editpostmodal = ({
   const [errorBoarderLang, setErrorBoarderLang] = useState(false);
   const [errorBoarderContent, setErrorBoarderContent] = useState(false);
   const [editorHtml, setEditorHtml] = useState('');
+
+  const { token, isValid } = useFetchToken();
+  console.log('token', token);
+  console.log('isValid', isValid);
+
+
 
   useEffect(() => {
     setTitle(item.news.title);
@@ -88,7 +91,6 @@ const Editpostmodal = ({
       console.log(post);
       // Updating news article 
       try {
-        const token = '666ab2a5be8ee1.66302861';
         const id = item.news.id;
         const response = await axios.put(
           `/api/index.php/rest/photographer_portal/news/${id}`,
@@ -105,7 +107,6 @@ const Editpostmodal = ({
         if (response.status === 200){
           // removing all read by data for this post
           try { 
-            const token = '666ab2a5be8ee1.66302861';
             const id = item.news.id;
             const response = await axios.delete(
               `/api/index.php/rest/photographer_portal/newsread/${id}`, {

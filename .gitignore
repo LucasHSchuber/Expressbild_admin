@@ -24,6 +24,8 @@ dist-ssr
 *.sw?
 
 server/DbConfig.js
+env.js
+.env.js
 server/uploads/
 server/uploads
 

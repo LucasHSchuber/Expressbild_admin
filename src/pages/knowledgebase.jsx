@@ -6,28 +6,21 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Newpostbutton from '../components/newpostbutton';
 import Newpostknowledgebasemodal from '../components/newpostknowledgebasemodal';
 
+import ENV from '../../env.js'; 
+console.log('ENV', ENV);
+console.log('ENV.API_URL', ENV.API_URL);
+
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faT,
-  faAlignJustify,
-  faClock,
-  faPenToSquare,
-  faGlasses,
-  faGlobeAmericas,
-  faTrashAlt,
-  faPlus,
-  faFile,
-  faTag
-} from '@fortawesome/free-solid-svg-icons';
+import { faT,faAlignJustify,faClock,faPenToSquare,faGlobeAmericas,faTrashAlt,faPlus,faFile,faTag } from '@fortawesome/free-solid-svg-icons';
 
 import '../assets/css/main_knowledgebase.css';
 import '../assets/css/global.css';
 
 import fetchTags from "../assets/js/fetchTags.js"
-
+import useFetchToken from "../assets/js/fetchToken.js"
 
 
 
@@ -46,68 +39,53 @@ const Knowledgebase = () => {
     DE: 0,
     NO: 0,
   });
-  const [token, setToken] = useState("");
+
   const [tags, setTags] = useState([]);
 
   const navigate = useNavigate();
+  const { token, isValid } = useFetchToken();
+  console.log('token', token);
+  console.log('isValid', isValid);
 
 
- 
+
+
+  // fetch data
   const fetchData = async () => {
-    setLoading(true);
-    try {
-    const response = await fetch('http://localhost:3003/api/articles');
-    
-    if (!response.ok) {
-        throw new Error('Network response was not ok');
-    }
-    const data = await response.json();
-    console.log('Fetched data:', data);
-    setKnowledgeBase(data)
-    getTags();
-    } catch (error) {
-    console.log('error:', error);
-    setLoading(false);
-    }
+      setLoading(true);
+      try {
+      const response = await fetch(`${ENV.API_URL}api/articles`);
+      
+      if (!response.ok) {
+          throw new Error('Network response was not ok');
+      }
+      const data = await response.json();
+      console.log('Fetched data:', data);
+      setKnowledgeBase(data)
+      getTags();
+      } catch (error) {
+      console.log('error:', error);
+      setLoading(false);
+      }
   };
+  useEffect(() => {
+    if (isValid) {
+      fetchData();
+    }
+  }, [token, isValid]);
 
+
+
+  // get all tags
   const getTags = async () => {
     const fetchedTags = await fetchTags();
     setTags(fetchedTags); 
     setLoading(false);
-  console.log('fetchedTags', fetchedTags);
+    console.log('fetchedTags', fetchedTags);
   };
 
-  useEffect(() => {
-    fetchData();
-  }, [token]);
 
-
-  
-
-
-
-  // Fetch token from URL query parameters
-  useEffect(() => {
-    const fetchToken = () => {
-      // Check if the environment is development
-      if (process.env.NODE_ENV === 'development') {
-        setToken('666ab2a5be8ee1.66302861');
-      } else {
-        // Fetch token from URL query parameters
-        const location = useLocation();
-        const queryParams = new URLSearchParams(location.search);
-        const token = queryParams.get('token'); 
-        console.log(token);
-        setToken(token); 
-      }
-    };
-    fetchToken();
-  }, []);
-  
-  
-
-
+  // count sum countries
   useEffect(() => {
     const countSumCountries = () => {
       const counts = {
@@ -153,11 +131,9 @@ const Knowledgebase = () => {
     setShowModal(true);
     console.log('Modal opened from Index.jsx');
   };
-
   const handleCloseModal = () => {
     setShowModal(false);
   };
-
   //delete confrim
   const handleDeleteClick = (id) => {
     const userConfirmed = window.confirm(
@@ -171,9 +147,8 @@ const Knowledgebase = () => {
   //delete news from database
   const deleteArticle = async (id) => {
     console.log('deleted article id:', id);
-    const token = '666ab2a5be8ee1.66302861';
     try {
-      const responseDelete = await fetch(`http://localhost:3003/api/articles/${id}`, {
+      const responseDelete = await fetch(`${ENV.API_URL}api/articles/${id}`, {
             method: 'DELETE',
             headers: {
             Authorization: `Admin ${token}`,
@@ -205,8 +180,27 @@ const Knowledgebase = () => {
     let itemId = item.id;
     // navigate(`/newsdetails/${item.news.id}`, { state: { item } });
     navigate(`/knowledgedetails/${item.id}/?token=${token}`, { state: { itemId } });
-
   };
+
+
+
+  // If missing token SHOW:
+  if (isValid === false) {
+    return (
+        <div className='page-wrapper' >
+        <h2 style={{ color: '#ff4d4d', marginBottom: '10px' }}>Missing or Invalid Token</h2>
+        <h5 style={{ color: '#666', marginBottom: '20px' }}>
+            Please contact IT if the issue persists.
+        </h5>
+        <button 
+            onClick={() => window.location.reload()} 
+            style={{ padding: '10px 20px',backgroundColor: '#007bff',color: '#fff',border: 'none',borderRadius: '5px',cursor: 'pointer'}}
+        >
+            Refresh Page
+        </button>
+    </div>
+    );
+  }
 
   return (
     <div className="page-wrapper table-responsive">

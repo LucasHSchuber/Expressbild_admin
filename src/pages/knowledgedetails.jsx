@@ -4,6 +4,9 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Modal, Button } from 'react-bootstrap';
 
+import ENV from '../../env.js'; 
+console.log('ENV', ENV);
+console.log('ENV.API_URL', ENV.API_URL);
 
 import { Worker, Viewer } from '@react-pdf-viewer/core';
 import '@react-pdf-viewer/core/lib/styles/index.css'; 
@@ -21,6 +24,7 @@ import Editpostknowledgebasemodal from '../components/editpostknowledgebasemodal
 import '../assets/css/global.css';
 
 import fetchTags from '../assets/js/fetchTags.js';
+import useFetchToken from "../assets/js/fetchToken.js"
 
 
 
@@ -31,24 +35,23 @@ const Knowledgedetails = () => {
   const { itemId } = location.state || {};
   console.log('itemId', itemId);
   
- 
   //define states
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [refreshCount, setRefreshCount] = useState(1);
-  const [token, setToken] = useState('');
-  const [pdfUrl, setPdfUrl] = useState(null);
 
   const [item, setItem] = useState({});
   const [tags, setTags] = useState([]);
 
+  const { token, isValid } = useFetchToken();
+  console.log('token', token);
+  console.log('isValid', isValid);
 
 
   
   const fetchData = async () => {
     setLoading(true);
     try {
-    const response = await fetch(`http://localhost:3003/api/articles/${itemId}`);
+    const response = await fetch(`${ENV.API_URL}api/articles/${itemId}`);
     
     if (!response.ok) {
         throw new Error('Network response was not ok');
@@ -71,8 +74,10 @@ const Knowledgedetails = () => {
   };
 
   useEffect(() => {
-    fetchData();
-  }, [token]);
+    if (isValid) {
+      fetchData();
+    }
+  }, [token, isValid]);
 
 
 
@@ -94,33 +99,16 @@ const Knowledgedetails = () => {
     }
 
   };
+
   function base64ToBlob(base64, contentType = 'application/pdf') {
     const byteCharacters = atob(base64);
     const byteNumbers = Array.from(byteCharacters).map(char => char.charCodeAt(0));
     const byteArray = new Uint8Array(byteNumbers);
     return new Blob([byteArray], { type: contentType });
-}
+  }
 
 
 
-  // Fetch token from URL query parameters
-  useEffect(() => {
-    const fetchToken = () => {
-      // Check if the environment is development
-      if (process.env.NODE_ENV === 'development') {
-        setToken('666ab2a5be8ee1.66302861');
-      } else {
-        // Fetch token from URL query parameters
-        const queryParams = new URLSearchParams(window.location.search);
-        const tokenFromQuery = queryParams.get('token');
-        console.log(tokenFromQuery);
-        setToken(tokenFromQuery !== undefined ? tokenFromQuery : ''); 
-      }
-    };
-    fetchToken();
-  }, []);
-
-  
   //handle open modal
   const handleOpenModal = () => {
     setShowModal(true);
@@ -146,7 +134,7 @@ const Knowledgedetails = () => {
     console.log('deleted article:', id);
     const token = '666ab2a5be8ee1.66302861';
     try {
-        const responseDelete = await fetch(`http://localhost:3003/api/articles/${id}`, {
+        const responseDelete = await fetch(`${ENV.API_URL}api/articles/${id}`, {
               method: 'DELETE',
               headers: {
               Authorization: `Admin ${token}`,
@@ -180,6 +168,24 @@ const Knowledgedetails = () => {
 
   if (!item) {
     return <div>No data details available.</div>;
+  }
+
+  // If missing token SHOW:
+  if (isValid === false) {
+    return (
+        <div className='page-wrapper' >
+        <h2 style={{ color: '#ff4d4d', marginBottom: '10px' }}>Missing or Invalid Token</h2>
+        <h5 style={{ color: '#666', marginBottom: '20px' }}>
+            Please contact IT if the issue persists.
+        </h5>
+        <button 
+            onClick={() => window.location.reload()} 
+            style={{ padding: '10px 20px',backgroundColor: '#007bff',color: '#fff',border: 'none',borderRadius: '5px',cursor: 'pointer'}}
+        >
+            Refresh Page
+        </button>
+    </div>
+    );
   }
 
   return (

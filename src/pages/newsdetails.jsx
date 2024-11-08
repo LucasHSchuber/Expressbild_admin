@@ -12,6 +12,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 import Editpostmodal from '../components/editpostmodal';
+import useFetchToken from "../assets/js/fetchToken.js"
 
 import '../assets/css/global.css';
 
@@ -20,11 +21,8 @@ const Newsdetails = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { item } = location.state || {};
- 
   
   //define states
-  const [loading, setLoading] = useState(true);
-
   const [news, setNews] = useState([]);
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
@@ -40,24 +38,11 @@ const Newsdetails = () => {
     NO: 0,
   });
   const [refreshCount, setRefreshCount] = useState(1);
-  const [token, setToken] = useState('');
+  
+  const { token, isValid } = useFetchToken();
+  console.log('token', token);
+  console.log('isValid', isValid);
 
-  // Fetch token from URL query parameters
-  useEffect(() => {
-    const fetchToken = () => {
-      // Check if the environment is development
-      if (process.env.NODE_ENV === 'development') {
-        setToken('666ab2a5be8ee1.66302861');
-      } else {
-        // Fetch token from URL query parameters
-        const queryParams = new URLSearchParams(window.location.search);
-        const tokenFromQuery = queryParams.get('token');
-        console.log(tokenFromQuery);
-        setToken(tokenFromQuery !== undefined ? tokenFromQuery : ''); 
-      }
-    };
-    fetchToken();
-  }, []);
 
 
    // Fetch all data effect
@@ -65,7 +50,6 @@ const Newsdetails = () => {
       // Fetch news
       const fetchNews = async () => {
         try {
-          // const token = '666ab2a5be8ee1.66302861';
           const response = await axios.get(
             '/api/index.php/rest/photographer_portal/news',
             {
@@ -85,7 +69,6 @@ const Newsdetails = () => {
       // Fetch users
       const fetchUsers = async () => {
         try {
-          // const token = '666ab2a5be8ee1.66302861';
           const responseUsers = await axios.get(
             '/api/index.php/rest/photographer_portal/users',
             {
@@ -105,7 +88,6 @@ const Newsdetails = () => {
       // Fetch read news
       const fetchReadAllNews = async () => {
         try {
-          // const token = '666ab2a5be8ee1.66302861';
           const responseRead = await axios.get(
             '/api/index.php/rest/photographer_portal/newsread',
             {
@@ -129,10 +111,11 @@ const Newsdetails = () => {
       setRefreshCount((prevCount) => prevCount + 1);
     };
 
-    useEffect(() => {
-
-    fetchAllData();
-  }, [token]);
+  useEffect(() => {
+    if (isValid){
+      fetchAllData();
+    }
+  }, [token, isValid]);
 
   
 
@@ -263,7 +246,6 @@ const Newsdetails = () => {
   //Method to delete post
   const deleteNews = async (id) => {
     console.log('deleted news:', id);
-    // const token = '666ab2a5be8ee1.66302861';
     try {
       const responseDelete = await axios.delete(
         `/api/index.php/rest/photographer_portal/news/${id}`,
@@ -296,6 +278,24 @@ const Newsdetails = () => {
 
   if (!pulledNews || !pulledNews.news) {
     return <div>No news details available.</div>;
+  }
+
+  // If missing token SHOW:
+  if (isValid === false) {
+    return (
+        <div className='page-wrapper' >
+        <h2 style={{ color: '#ff4d4d', marginBottom: '10px' }}>Missing or Invalid Token</h2>
+        <h5 style={{ color: '#666', marginBottom: '20px' }}>
+            Please contact IT if the issue persists.
+        </h5>
+        <button 
+            onClick={() => window.location.reload()} 
+            style={{ padding: '10px 20px',backgroundColor: '#007bff',color: '#fff',border: 'none',borderRadius: '5px',cursor: 'pointer'}}
+        >
+            Refresh Page
+        </button>
+    </div>
+    );
   }
 
   return (

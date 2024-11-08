@@ -11,14 +11,23 @@ import 'react-quill/dist/quill.snow.css';
 
 import '../assets/css/components.css';
 
+import useFetchToken from "../assets/js/fetchToken.js"
+
+
 const Newpostmodal = ({ show, handleClose, refreshData }) => {
+  if (!show) return null;
+
   //define states
   const [selectedLanguages, setSelectedLanguages] = useState([]);
   const [errorBoarderLang, setErrorBoarderLang] = useState(false);
   const [errorBoarderContent, setErrorBoarderContent] = useState(false);
   const [editorHtml, setEditorHtml] = useState('');
 
-  if (!show) return null;
+  const { token, isValid } = useFetchToken();
+  console.log('token', token);
+  console.log('isValid', isValid);
+
+
 
   //handle change for ReactQuill text-editor
   const handleChange = (html) => {
@@ -59,7 +68,6 @@ const Newpostmodal = ({ show, handleClose, refreshData }) => {
   //submitting post
   const handleSubmitPost = async (post) => {
     console.log('Post submitted:', post);
-    const token = '666ab2a5be8ee1.66302861';
     try {
       const response = await axios.post(
         '/api/index.php/rest/photographer_portal/news',

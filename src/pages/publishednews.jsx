@@ -21,6 +21,8 @@ import {
 import '../assets/css/main_adminfornews.css';
 import '../assets/css/global.css';
 
+import useFetchToken from "../assets/js/fetchToken.js"
+
 
 const Publishednews = () => {
   //define state
@@ -38,36 +40,19 @@ const Publishednews = () => {
     DE: 0,
     NO: 0,
   });
-  const [token, setToken] = useState("");
-
+  
+  const { token, isValid } = useFetchToken();
+  console.log('token', token);
+  console.log('isValid', isValid);
 
   const navigate = useNavigate();
 
 
-  // Fetch token from URL query parameters
-  useEffect(() => {
-    const fetchToken = () => {
-      // Check if the environment is development
-      if (process.env.NODE_ENV === 'development') {
-        setToken('666ab2a5be8ee1.66302861');
-      } else {
-        // Fetch token from URL query parameters
-        const location = useLocation();
-        const queryParams = new URLSearchParams(location.search);
-        const token = queryParams.get('token'); 
-        console.log(token);
-        setToken(token); 
-      }
-    };
-    fetchToken();
-  }, []);
-  
 
   const fetchAllData = async () => {
     setLoading(true);
     //fetching all news
     const fetchNews = async () => {
-      // const token = '666ab2a5be8ee1.66302861';
       try {
         const response = await axios.get(
           '/api/index.php/rest/photographer_portal/news',
@@ -87,7 +72,6 @@ const Publishednews = () => {
     };
     //fetching all users
     const fetchUsers = async () => {
-      // const token = '666ab2a5be8ee1.66302861';
       try {
         const responseUsers = await axios.get(
           '/api/index.php/rest/photographer_portal/users',
@@ -108,7 +92,6 @@ const Publishednews = () => {
 
     //fetching all read post
     const fetchReadAllNews = async () => {
-      // const token = '666ab2a5be8ee1.66302861';
       try {
         const responseRead = await axios.get(
           '/api/index.php/rest/photographer_portal/newsread',
@@ -132,8 +115,10 @@ const Publishednews = () => {
   };
 
   useEffect(() => {
-    fetchAllData();
-  }, [token]);
+    if (isValid) {
+      fetchAllData();
+    }
+  }, [token, isValid]);
 
   useEffect(() => {
     // Merge arrays
@@ -249,6 +234,27 @@ const Publishednews = () => {
     navigate(`/newsdetails/${item.news.id}/?token=${token}`, { state: { item } });
 
   };
+
+
+
+  
+  // If missing token SHOW:
+  if (isValid === false) {
+    return (
+        <div className='page-wrapper' >
+        <h2 style={{ color: '#ff4d4d', marginBottom: '10px' }}>Missing or Invalid Token</h2>
+        <h5 style={{ color: '#666', marginBottom: '20px' }}>
+            Please contact IT if the issue persists.
+        </h5>
+        <button 
+            onClick={() => window.location.reload()} 
+            style={{ padding: '10px 20px',backgroundColor: '#007bff',color: '#fff',border: 'none',borderRadius: '5px',cursor: 'pointer'}}
+        >
+            Refresh Page
+        </button>
+    </div>
+    );
+  }
 
   return (
     <div className="page-wrapper table-responsive">

@@ -3,11 +3,12 @@
 
 /* search bar */
 .search-bar {
-  width: 25em;
+  width: 20em;
   height: 2.3em;
   font-size: 0.9em;
-  padding-left: 0.3em;
-  border: 1.5px solid black;
+  padding-left: 0.6em;
+  border-radius: 30px;
+  border: 1px solid rgb(61, 61, 61);
 }
 
 .search-bar:focus {
@@ -20,7 +21,8 @@
   margin: 0 0 0 0.7em;
   font-size: 0.9em;
   height: 2.3em;
-  border: 1.5px solid black;
+  border-radius: 2px;
+  border: 1px solid rgb(61, 61, 61);
 }
 
 .control-sheet-table {

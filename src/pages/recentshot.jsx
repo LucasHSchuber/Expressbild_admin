@@ -13,6 +13,8 @@ import {
 import '../assets/css/main_recentshot.css';
 import '../assets/css/global.css';
 
+import useFetchToken from "../assets/js/fetchToken.js"
+
 
 const Recentshot = () => {
   //define states
@@ -29,10 +31,16 @@ const Recentshot = () => {
   const [isAscendingPhotographer, setIsAscendingPhotographer] = useState(null);
   const [isAscendingDate, setIsAscendingDate] = useState(null);
 
+  const { token, isValid } = useFetchToken();
+  console.log('token', token);
+  console.log('isValid', isValid);
+
+
+
+
   const fetchAllData = () => {
     //fetching all users
     const fetchUsers = async () => {
-      const token = '666ab2a5be8ee1.66302861';
       try {
         const responseUsers = await axios.get(
           '/api/index.php/rest/photographer_portal/users',
@@ -67,7 +75,6 @@ const Recentshot = () => {
       }
     };
     const fetchActivities = async () => {
-      const token = '666ab2a5be8ee1.66302861';
       try {
         let responseActivities = await axios.get(
           'api/index.php/rest/photographer_portal/activities',
@@ -100,15 +107,17 @@ const Recentshot = () => {
         console.error('Error fetching activites:', error.message);
       }
     };
-
     fetchUsers();
     fetchProjects();
     fetchActivities();
   };
-
   useEffect(() => {
-    fetchAllData();
-  }, []);
+    if (isValid) {
+      fetchAllData();
+    }
+  }, [token, isValid]);
+
+
 
   const getLatestActivities = (data) => {
     console.log(data);
@@ -137,7 +146,6 @@ const Recentshot = () => {
 
   //if search is entered
   useEffect(() => {
-    const token = '666ab2a5be8ee1.66302861';
 
     const fetchSearchActivities = async () => {
       try {
@@ -257,7 +265,25 @@ const Recentshot = () => {
     setDataForControlSheet(e);
   };
 
-  console.log(dataForControlSheet);
+
+
+  // If missing token SHOW:
+  if (isValid === false) {
+    return (
+        <div className='page-wrapper' >
+        <h2 style={{ color: '#ff4d4d', marginBottom: '10px' }}>Missing or Invalid Token</h2>
+        <h5 style={{ color: '#666', marginBottom: '20px' }}>
+            Please contact IT if the issue persists.
+        </h5>
+        <button 
+            onClick={() => window.location.reload()} 
+            style={{ padding: '10px 20px',backgroundColor: '#007bff',color: '#fff',border: 'none',borderRadius: '5px',cursor: 'pointer'}}
+        >
+            Refresh Page
+        </button>
+    </div>
+    );
+  }
 
   return (
     <div className="page-wrapper">
@@ -269,7 +295,7 @@ const Recentshot = () => {
       {/* select box */}
       <div className="mb-2">
         <label htmlFor="country" style={{ fontSize: '0.9em' }}>
-          Select a country:{' '}
+          <b>Country:{' '}</b>
         </label>
         <select
           id="country"
@@ -304,6 +330,7 @@ const Recentshot = () => {
             <th>
               Photographer:{' '}
               <FontAwesomeIcon
+                title='Sort on Photographer'
                 className="sort-button"
                 icon={faArrowDownWideShort}
                 onClick={() => orderByPhotographer()}
@@ -313,6 +340,7 @@ const Recentshot = () => {
             <th>
               Last job:{' '}
               <FontAwesomeIcon
+                title='Sort Last Job'
                 className="sort-button"
                 icon={faArrowDownWideShort}
                 onClick={() => orderByDate()}

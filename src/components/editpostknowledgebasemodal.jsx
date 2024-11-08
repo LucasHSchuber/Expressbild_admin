@@ -6,19 +6,24 @@ import React, { useEffect, useState, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faMinus, faTrash, faTimes, faUpload, faPenNib } from '@fortawesome/free-solid-svg-icons';
 
+import ENV from '../../env.js'; 
+console.log('ENV', ENV);
+console.log('ENV.API_URL', ENV.API_URL);
+
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 import '../assets/css/components.css';
 
+import useFetchToken from "../assets/js/fetchToken.js"
+
+
 const Editpostknowledgebasemodal = ({ show, handleClose, handleSubmit, item, refreshData, tagsArray}) => {
   if (!show) return null;
-
 
   //define states
   const [title, setTitle] = useState(item.title);
   const [tags, setTags] = useState([]);
-  // const [tagsNewArray, setTagsNewArray] = useState([]);
   const [description, setDescription] = useState(item.description);
   const [file, setFile] = useState([]);
   const fileInputRef = useRef(null);
@@ -28,13 +33,14 @@ const Editpostknowledgebasemodal = ({ show, handleClose, handleSubmit, item, ref
 
   const [selectedLanguages, setSelectedLanguages] = useState([]);
   const [errorBoarderLang, setErrorBoarderLang] = useState(false);
-  const [errorBoarderContent, setErrorBoarderContent] = useState(false);
-//   const [editorHtml, setEditorHtml] = useState('');
 
   const [openNewTag, setOpenNewTag] = useState(false);
-//   const [selectedTag, setSelectedTag] = useState('');
   const [newTag, setNewTag] = useState('');
   const [newTagSelect, setNewTagSelect] = useState('');
+
+  const { token, isValid } = useFetchToken();
+  console.log('token', token);
+  console.log('isValid', isValid);
 
 
   useEffect(() => {
@@ -84,8 +90,7 @@ const Editpostknowledgebasemodal = ({ show, handleClose, handleSubmit, item, ref
       // Updating news article 
       console.log("Sending data to db")
       try {
-        const token = '666ab2a5be8ee1.66302861';
-        const response = await fetch(`http://localhost:3003/api/articles/${item.id}`, {
+        const response = await fetch(`${ENV.API_URL}api/articles/${item.id}`, {
             method: 'PUT',
             headers: {
                 Authorization: `Admin ${token}`,

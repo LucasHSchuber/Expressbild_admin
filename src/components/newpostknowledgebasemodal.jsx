@@ -6,12 +6,20 @@ import React, { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes, faPlus, faMinus, faTrash, faUpload, faPenNib } from '@fortawesome/free-solid-svg-icons';
 
+import ENV from '../../env.js'; 
+console.log('ENV', ENV);
+console.log('ENV.API_URL', ENV.API_URL);
+
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 import '../assets/css/components.css';
 
+import useFetchToken from "../assets/js/fetchToken.js"
+
+
 const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
+  if (!show) return null;
   //define states
   const [selectedLanguages, setSelectedLanguages] = useState([]);
   const [file, setFile] = useState([]);
@@ -23,10 +31,9 @@ const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
   const [selectedTag, setSelectedTag] = useState('');
   const [newTag, setNewTag] = useState('');
 
-
-  if (!show) return null;
-
-
+  const { token, isValid } = useFetchToken();
+  console.log('token', token);
+  console.log('isValid', isValid);
 
 
 
@@ -73,7 +80,6 @@ const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
   //submitting post
   const handleSubmitPost = async (post) => {
     console.log('Post submitted:', post);
-    const token = '666ab2a5be8ee1.66302861';
     try {
         // Create FormData to include both post data and file
         const formData = new FormData();
@@ -97,7 +103,7 @@ const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
         for (const pair of formData.entries()) {
         console.log(`${pair[0]}: ${pair[1]}`);
         }
-        const response = await fetch('http://localhost:3003/api/articles', {
+        const response = await fetch(`${ENV.API_URL}api/articles`, {
             method: 'POST',
             headers: {
                 Authorization: `Admin ${token}`,
