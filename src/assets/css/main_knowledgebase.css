@@ -1,15 +1,8 @@
 /* MAIN CSS */
 
-/* wrapper */
-.page-wrapper {
-    padding: 8em 10em 10em 10em;
-  }
+
   
-  @media (max-width: 768px) {
-    .page-wrapper {
-      padding: 8em 1.2em 8em 1.2em;
-    }
-  }
+
   
   /* form */
   .form-input {

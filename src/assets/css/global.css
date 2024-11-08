@@ -1,7 +1,18 @@
 * {
     font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
 }
-
 .header-box h6{
     font-size: 1.2em;
+}
+
+
+/* wrapper */
+.page-wrapper {
+    padding: 6em 10em 10em 10em;
+}
+
+@media (max-width: 768px) {
+    .page-wrapper {
+      padding: 8em 1.2em 8em 1.2em;
+    }
 }
