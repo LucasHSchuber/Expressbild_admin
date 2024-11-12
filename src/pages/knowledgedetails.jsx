@@ -82,22 +82,9 @@ const Knowledgedetails = () => {
 
 
   // Decode base64 string and create Blob URL
-  const viewFile = (base64String, filename) => {
-    try {
-        console.log('filename:', filename);
-        console.log('Base64 String (first 100 characters):', base64String.substring(0, 100)); // Log only the first 100 characters for brevity
-
-        const blob = base64ToBlob(base64String);
-        console.log('Blob:', blob);
-
-        const url = URL.createObjectURL(blob);
-        window.open(url, '_blank');
-
-        URL.revokeObjectURL(url);
-    } catch (error) {
-        console.error('Error viewing file:', error);
-    }
-
+  const viewFile = async (file_server_id) => {
+    let fileURL = 'https://fs.ebx.nu/view/' + file_server_id
+    window.open(fileURL);
   };
 
   function base64ToBlob(base64, contentType = 'application/pdf') {
@@ -203,9 +190,9 @@ const Knowledgedetails = () => {
         ) : item ? (
           <div className="knowledge-details-box d-flex">
              <div className='knowledge-details-left-box'>
-                  <h5>
-                    <b>{item.title}</b> 
-                  </h5>
+                  <strong>Title:</strong>{' '}<br></br>
+                  <p>{item.title}</p>
+                  <strong>Description:</strong>{' '}
                   <p>{item.description}</p>
                   <p>
                     <strong>Tags:</strong>{' '}
@@ -214,10 +201,10 @@ const Knowledgedetails = () => {
                     </span>
                   </p>
                   <p>
-                    <strong>Files:</strong>{' '}
+                    <strong>Files:</strong>{' '}<br></br>
                     {item.files && item.files.map((file) => (
                     <span key={file.id}>
-                        <button className='file-button ' title='Open File' onClick={() => viewFile(file.path, file.name)}><FontAwesomeIcon style={{ color: "#008e9b" }} className='mr-2' icon={faFile} />{file.name}</button>
+                        <button className='file-button ' title='Open File' onClick={() => viewFile(file.file_server_id)}><FontAwesomeIcon style={{ color: "#008e9b" }} className='mr-2' icon={faFile} />{file.name}</button>
                     </span>
                   ))}
                   </p>

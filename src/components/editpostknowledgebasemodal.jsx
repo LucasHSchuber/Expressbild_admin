@@ -43,9 +43,6 @@ const Editpostknowledgebasemodal = ({ show, handleClose, handleSubmit, item, ref
   console.log('isValid', isValid);
 
 
-  useEffect(() => {
-    console.log('file', file);
-  }, [file]);
 
   useEffect(() => {
     console.log("item:",item)
@@ -106,8 +103,7 @@ const Editpostknowledgebasemodal = ({ show, handleClose, handleSubmit, item, ref
             console.log("File Duplicate exists in database");
             toast.error(data.error);
           }
-        
-
+      
         if (response.status === 200){
           refreshData();
           handleClose();
@@ -175,10 +171,10 @@ const handleFileChange = (file) => {
   // const file = event.target.files[0]; 
   console.log('file', file);
   if (file) {
-    const maxSize = 0.75 * 1024 * 1024; 
+    const maxSize = 210 * 1024 * 1024; 
     if (file.size > maxSize) {
       console.log("Too large file");
-      toast.error('File size cannot exceed 750 kB in file size');
+      toast.error('File size cannot exceed 200 MB in file size');
       event.target.value = ''; 
     } else {
       console.log('File selected:', file);
@@ -190,13 +186,7 @@ const handleFileChange = (file) => {
 };
 
 
-  useEffect(() => {
-    console.log('deleteFileArray', deleteFileArray);
-    console.log('uploadedFile', uploadedFile);
-  }, [deleteFileArray, uploadedFile]);
-
-
-
+  // add tag
   const addTag = (tag) => {
     console.log('tag', tag);
     if (tag !== "" && !tags.includes(tag)){

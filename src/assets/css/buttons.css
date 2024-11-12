@@ -1,13 +1,14 @@
 /* BUTTONS */
 
 .button {
-  width: 7em;
-  height: 2.4em;
+  width: 8.2em;
+  height: 2.7em;
   border: none;
   outline: none;
   border-radius: 2px;
   cursor: pointer;
   font-weight: 600;
+  border-radius: 5px;
 }
 .standard {
   background-color: rgb(28, 28, 28);
@@ -122,13 +123,28 @@
 
 .add-button{
   border: none;
-  color: grey;
+  color: rgb(30, 30, 30);
   background-color: inherit;
   cursor: pointer;
 }
 
 .add-button:hover{
   background-color: rgb(227, 227, 227) !important;
+}
+
+
+.delete-article-button{
+  padding: 0.3em 0.5em;
+  background-color: rgb(251, 251, 251);
+  border-radius: 6px;
+  border: 1px solid grey;
+  cursor: pointer;
+}
+.delete-article-button:hover{
+  background-color: rgb(230, 230, 230);
+}
+.delete-button-icon{
+  color: rgb(255, 58, 58);
 }
 
 

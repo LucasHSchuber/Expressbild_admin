@@ -77,26 +77,31 @@
     background-color: #efefef;
     cursor: pointer;
   }
-  .delete-table {
+  /* .delete-table {
     color: red;
     transition: 0.2s;
-  }
-  .delete-table:hover {
+  } */
+  /* .delete-table:hover {
     color: black;
-  }
+  } */
   
   /* KNOWLEDGE BASE DETAILS */
   .knowledge-details{
-    width: 50em;
+    width: 55em;
+    padding: 2em 3em 3em 3em;
+    border-radius: 10px;
     margin: auto;
+    background-color: rgb(247, 247, 247);
   }
   .knowledge-details-left-box{
     width: 25em;
+    font-size: 1.1em;
   }
   .knowledge-details-right-box{
     width: 20em;
     margin-left: 2em;
-    margin-top: 2em;
+    font-size: 1.1em;
+    /* margin-top: 2em; */
   }
 
   

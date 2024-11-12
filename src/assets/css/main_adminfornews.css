@@ -99,13 +99,7 @@
   background-color: #efefef;
   cursor: pointer;
 }
-.delete-table {
-  color: red;
-  transition: 0.2s;
-}
-.delete-table:hover {
-  color: black;
-}
+
 
 /* NEWSDETAILS */
 .left-box {

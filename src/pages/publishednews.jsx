@@ -338,14 +338,18 @@ const Publishednews = () => {
                   </td>
 
                   <td>
+                  <button
+                     className='delete-article-button'
+                     onClick={(e) => {
+                       e.stopPropagation();
+                       handleDeleteClick(item.id);
+                     }}
+                     >
                     <FontAwesomeIcon
-                      className="delete-table"
                       icon={faTrashAlt}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteClick(item.news.id);
-                      }}
+                      className="delete-button-icon"
                     />
+                    </button>
                   </td>
                 </tr>
               ))

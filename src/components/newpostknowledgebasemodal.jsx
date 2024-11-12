@@ -25,7 +25,8 @@ const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
   const [file, setFile] = useState([]);
   const [tagsArray, setTagsArray] = useState([]);
   const [errorBoarderLang, setErrorBoarderLang] = useState(false);
-  const [description, setDescription] = useState('');
+
+  const [fileResponses, setFileResponses] = useState([]);
 
   const [openNewTag, setOpenNewTag] = useState(false);
   const [selectedTag, setSelectedTag] = useState('');
@@ -61,7 +62,7 @@ const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
       console.log('Choose at least one tag');
       return;
     } 
-    if (formData.get('tag') === "" && newTag === "") {
+    if (tagsArray.length === 0) {
         console.log('Missing tag');
         return;
     }
@@ -73,57 +74,81 @@ const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
         langs: lang,
       };
       handleSubmitPost(post);
-      handleClose();
     }
   };
 
+
+
+
   //submitting post
   const handleSubmitPost = async (post) => {
+    const fileResponses = []
     console.log('Post submitted:', post);
-    try {
-        // Create FormData to include both post data and file
-        const formData = new FormData();
-        formData.append('title', post.title);
-        formData.append('description', post.description);
-        // if (post.tags && post.tags.trim() !== "") {
-        //     formData.append('tags', post.tags);
-        // } else if (newTag && newTag.trim() !== "") {
-        //     formData.append('tags', newTag);
-        // }
-        formData.append('tags', post.tags);
-        formData.append('langs', post.langs);
+    // Step 1: Upload file/files to FTP
+    for (const _file of file) {
+        // console.log('_file', _file);
+        const fileData = new FormData();
+        fileData.append('file', _file)
       
-        if (file.length > 0) {
-          for (let i = 0; i < file.length; i++) {
-              formData.append('files', file[i]);
-          }
-      }
-      console.log('Files:', file);
-        // Log FormData content
-        for (const pair of formData.entries()) {
-        console.log(`${pair[0]}: ${pair[1]}`);
+        const file = await uploadToFileServer(fileData);
+        console.log('File uploaded:', file);
+        // setFileResponses((prevResponses) => [...prevResponses, file]);
+        if (file) {
+          fileResponses.push(file); 
         }
-        const response = await fetch(`${ENV.API_URL}api/articles`, {
-            method: 'POST',
-            headers: {
-                Authorization: `Admin ${token}`,
-            },
-            body: formData, 
-        });
-        const result = await response.json();
-        if (!response.ok) {
-          console.log('Response not ok', response);
-          console.log('Response not ok', result);
-          throw new Error('Network response was not ok');
-        }
-        console.log('Article added:', result);
-        setTagsArray([]);
-        refreshData();
-        
-    } catch (error) {
-        console.error('Error adding article:', error);
+        console.log('fileResponses', fileResponses);
+    }
+
+    if (fileResponses.length === file.length){
+          // Step 2: If response OK from FTP then upload to db
+            const formData = new FormData();
+            formData.append('title', post.title);
+            formData.append('description', post.description);
+            formData.append('tags', post.tags);
+            formData.append('langs', post.langs);
+            fileResponses.forEach(({ name, id }) => {
+              formData.append('files', JSON.stringify({ name, id })); 
+            });
+ 
+            const response = await fetch(`${ENV.API_URL}api/articles`, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Admin ${token}`,
+                },
+                body: formData, 
+            });
+            const result = await response.json();
+            if (!response.ok) {
+              console.log('Response not ok', response);
+              console.log('Response not ok', result);
+              throw new Error('Network response was not ok');
+            }
+            console.log('Article added:', result);
+            handleClose();
+            setTagsArray([]);
+            refreshData();
+    } else{
+      console.log('error adding file to File-server', error);
     }
   };
+
+  const uploadToFileServer = async (fileData) => {
+      try {
+        const FTPresponse = await axios.post("https://fs.ebx.nu/upload", fileData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Admin ${token}`,
+          },
+        });
+        if (FTPresponse.status === 200) {
+          console.log('FTPresponse', FTPresponse);
+          return FTPresponse.data;  
+        }
+      } catch (error) {
+        console.error(`Upload attempt failed`, error);
+      }
+  };
+  
 
 
   //handle checkbox change
@@ -143,20 +168,23 @@ const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
         if (newSelected.length === 5) {
           return ['All', ...newSelected];
         }
-
         return newSelected.filter((lang) => lang !== 'All');
       });
     }
   };
 
+
+
+  // handle file cahnge
   const handleFileChange = (file) => {
     // const file = event.target.files[0]; 
     console.log('file', file);
+    // setFile((prevArray) => [...prevArray, file]);
     if (file) {
-      const maxSize = 0.75 * 1024 * 1024; 
+      const maxSize = 210 * 1024 * 1024; 
       if (file.size > maxSize) {
         console.log("Too large file");
-        toast.error('File size cannot exceed 750 kB in file size');
+        toast.error('File size cannot exceed 200 MB in file size');
         event.target.value = ''; 
       } else {
         console.log('File selected:', file);
@@ -168,25 +196,24 @@ const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
   };
   
 
-    const handleSelectChange = (event) => {
-        setSelectedTag(event.target.value);
-    };
-
-    const handleNewTagChange = (event) => {
-        console.log('event.target.value', event.target.value);
-        setNewTag(event.target.value);
-    };
-
-
-    const addTag = (tag) => {
-      console.log('tag', tag);
-      if (tag !== "" && !tagsArray.includes(tag)){
-      setTagsArray((prevArray) => [...prevArray, tag]);
-      setNewTag("");
-      }  else {
-        console.log('Tag already exists or is empty');
-      }
-    };
+  // set tag
+  const handleSelectChange = (event) => {
+      setSelectedTag(event.target.value);
+  };
+  // set new tag
+  const handleNewTagChange = (event) => {
+      console.log('event.target.value', event.target.value);
+      setNewTag(event.target.value);
+  };
+  const addTag = (tag) => {
+    console.log('tag', tag);
+    if (tag !== "" && !tagsArray.includes(tag)){
+    setTagsArray((prevArray) => [...prevArray, tag]);
+    setNewTag("");
+    }  else {
+      console.log('Tag already exists or is empty');
+    }
+  };
 
 
 
@@ -226,10 +253,7 @@ const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
               <textarea
                 className={`form-textarea`}
                 name="description"
-                // theme="snow"
-                // value={description}
-                // onChange={() => handleChange()}
-                required
+                // required
               />
             </div>
           </div>
@@ -242,7 +266,7 @@ const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
                     name='tag'
                     value={selectedTag}
                     onChange={handleSelectChange}
-                    required={newTag.trim() === ""}
+                    required={tagsArray.length === 0}
                 >
                     <option value="">Select a tag</option>
                     {tags.map((tag, index) => (
@@ -251,7 +275,7 @@ const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
                         </option>
                     ))}
                 </select>
-                <button className='standard add-button' title='Add Tag'  type="button"  onClick={() => addTag(selectedTag)}> <FontAwesomeIcon icon={faPlus} /> </button>
+                <button className='standard add-button' title='Add Tag'  type="button"  onClick={() => addTag(selectedTag)}>  <FontAwesomeIcon icon={faPlus} /> </button>
                 <button className='standard add-button' title='Create New Tag'  type="button"  onClick={() => setOpenNewTag(!openNewTag)}><FontAwesomeIcon  icon={faPenNib} /></button>
                 {tagsArray.length > 0 && (
                   <div className='ml-2'>
@@ -293,8 +317,8 @@ const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
             <label htmlFor="file-input" 
               className={`ml-2 custom-file-button`}
               >
-                {/* Upload */}
-                <FontAwesomeIcon title='Upload File' icon={faUpload} />
+              {/* Upload */}
+              <FontAwesomeIcon title='Upload File' icon={faUpload} />
             </label>
             {file.length > 0 && (
             <div className='ml-2' style={{ width: "20em" }}>              

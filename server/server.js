@@ -6,14 +6,21 @@ import dbConfig from './dbConfig.js';
 import multer from 'multer';
 import zlib from 'zlib';
 
+
 // Configure multer for in-memory file storage
 const storage = multer.memoryStorage();
 const upload = multer({
   storage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // Limit to 10 MB
+  limits: { fileSize: 250 * 1024 * 1024 }, // Limit to 250 MB
 });
 const app = express();
 const port = 3003;
+
+
+app.use(express.json({ limit: '250mb' })); // Adjust as needed
+app.use(express.urlencoded({ limit: '250mb', extended: true }));
+
+
 
 // Middleware to parse JSON bodies
 app.use(cors());
@@ -148,6 +155,7 @@ app.get('/api/articles/:id', (req, res) => {
         COALESCE(
             (SELECT JSON_ARRAYAGG(
                 JSON_OBJECT(
+                    'file_server_id', f.file_server_id,
                     'name', f.filename,
                     'path', f.filepath,
                     'created_at', f.created_at,
@@ -188,11 +196,10 @@ app.get('/api/articles/:id', (req, res) => {
 
 // Route to add a new article
 app.post('/api/articles', upload.array('files'), (req, res) => {
+  console.log("req.body ", req.body);
   const { title, description, author, tags, langs } = req.body;
-  const files = req.files;
-
+  const files = req.body.files;
   console.log('Files received:', files); 
-  console.log('Tags received:', tags); 
 
   if (!title || !description || !tags || !langs) {
     return res.status(400).json({ error: 'Title, description, tags and files are required.' });
@@ -238,11 +245,13 @@ app.post('/api/articles', upload.array('files'), (req, res) => {
         });
       }
 
-      console.log("files sending to db", files);
-    // Insert files
-    if (files && files.length > 0) {
-      const insertFilesQuery = 'INSERT INTO kb_article_files (article_id, filename, filepath, created_at) VALUES ?';
-      const filesValues = files.map(file => [articleId, file.originalname, file.buffer.toString('base64'), new Date()]);
+      // Insert files
+      // Ensure files is an array even if only one file
+      const filesArray = Array.isArray(files) ? files : [files];
+      const parsedFiles = filesArray.map(file => JSON.parse(file));
+      if (parsedFiles && parsedFiles.length > 0) { 
+      const insertFilesQuery = 'INSERT INTO kb_article_files (article_id, file_server_id, filename, created_at) VALUES ?';
+      const filesValues = parsedFiles.map(file => [articleId, file.id, file.name, new Date()]);
       db.query(insertFilesQuery, [filesValues], (error) => {
         if (error) {
           console.error('SQL error:', error); 
@@ -254,6 +263,7 @@ app.post('/api/articles', upload.array('files'), (req, res) => {
     res.status(201).json({ message: 'Article added successfully.', articleId });
   });
 });
+
 
 
 // Route to update an article
