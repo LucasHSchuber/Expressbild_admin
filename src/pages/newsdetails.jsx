@@ -304,9 +304,9 @@ const Newsdetails = () => {
         <FontAwesomeIcon icon={faCaretLeft} />
       </button>
 
-      <div className="news-details d-flex">
+      <div className="news-details d-flex justify-content-center">
         {pulledNews && (
-          <div className="left-box mr-5 ">
+          <div className="left-box mr-2 ">
             <div className="inner-left-box">
               <h5>
                 <b>{pulledNews?.news?.title}</b> {/* Display the title */}

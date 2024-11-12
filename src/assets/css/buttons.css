@@ -34,12 +34,12 @@
   outline: none;
   border-radius: 5px;
   cursor: pointer;
-  background-color: rgb(250, 250, 250);
-  border: 0.5px solid rgb(215, 215, 215);
+  background-color: rgb(255, 255, 255);
+  border: 0.5px solid rgb(148, 148, 148);
   transition: 0.1s;
 }
 .back:hover {
-  background-color: #efefef;
+  background-color: #f7f7f7;
 }
 .delete {
   background-color: rgb(255, 69, 69);

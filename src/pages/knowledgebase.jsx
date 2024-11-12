@@ -26,7 +26,7 @@ import useFetchToken from "../assets/js/fetchToken.js"
 
 const Knowledgebase = () => {
   //define states   
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const [knowledgeBase, setKnowledgeBase] = useState([]);
   const [users, setUsers] = useState([]);
@@ -52,7 +52,6 @@ const Knowledgebase = () => {
 
   // fetch data
   const fetchData = async () => {
-      setLoading(true);
       try {
       const response = await fetch(`${ENV.API_URL}api/articles`);
       
@@ -70,6 +69,7 @@ const Knowledgebase = () => {
   };
   useEffect(() => {
     if (isValid) {
+      setLoading(true);
       fetchData();
     }
   }, [token, isValid]);
@@ -127,9 +127,10 @@ const Knowledgebase = () => {
     }
   }, [users]);
 
-  const handleOpenModal = () => {
-    setShowModal(true);
-    console.log('Modal opened from Index.jsx');
+  const handleSuccess = () => {
+    setTimeout(() => {
+      fetchData(true);
+    }, 500);
   };
   const handleCloseModal = () => {
     setShowModal(false);
@@ -322,9 +323,8 @@ const Knowledgebase = () => {
       <Newpostknowledgebasemodal
         show={showModal}
         handleClose={handleCloseModal}
-        refreshData={fetchData}
+        refreshData={handleSuccess}
         tags={tags}
-        
       />
 
         <ToastContainer 

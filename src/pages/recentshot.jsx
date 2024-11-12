@@ -288,7 +288,7 @@ const Recentshot = () => {
   return (
     <div className="page-wrapper">
       <div className='header-box'>
-        <h6 className="header-box mb-4">
+        <h6 className="header-box mb-5">
           <b>Recent shot:</b>
         </h6>
        </div>

@@ -344,24 +344,6 @@ const deleteFiles = async (articleId, deletedFiles) => {
   }
 };
 // Function to add new files
-// const addFiles = async (articleId, uploadedFiles) => {
-//   const insertFilesQuery = 'INSERT INTO kb_article_files (article_id, filename, filepath, created_at) VALUES ?';
-
-//   const fileValues = uploadedFiles.map(file => [
-//     articleId,
-//     file.originalname, 
-//     file.buffer.toString('base64'), 
-//     new Date() 
-//   ]);
-
-//   try {
-//     await executeQuery(insertFilesQuery, [fileValues]);
-//   } catch (error) {
-//     console.error('SQL error:', error);
-//     throw new Error('An error occurred while adding files.');
-//   }
-// };
-// Function to add new files
 const addFiles = async (articleId, uploadedFiles) => {
   const filenames = uploadedFiles.map(file => file.originalname);
 

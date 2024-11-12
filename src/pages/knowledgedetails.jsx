@@ -178,16 +178,13 @@ const Knowledgedetails = () => {
   return (
     <div className="page-wrapper">
 
+      <button className="back mb-5" title='Back' onClick={() => navigate(-1)}>
+          <FontAwesomeIcon icon={faCaretLeft} />
+      </button>
+
       <div className="knowledge-details">
 
-        <button className="back mb-5" title='Back' onClick={() => navigate(-1)}>
-          <FontAwesomeIcon icon={faCaretLeft} />
-        </button>
-        {loading ? (
-          <div>Loading data...</div>
-        ) : (!item) ? (
-          <div>No Data Available</div>
-        ) : item ? (
+        {item ? (
           <div className="knowledge-details-box d-flex">
              <div className='knowledge-details-left-box'>
                   <strong>Title:</strong>{' '}<br></br>

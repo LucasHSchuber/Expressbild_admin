@@ -26,8 +26,6 @@ const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
   const [tagsArray, setTagsArray] = useState([]);
   const [errorBoarderLang, setErrorBoarderLang] = useState(false);
 
-  const [fileResponses, setFileResponses] = useState([]);
-
   const [openNewTag, setOpenNewTag] = useState(false);
   const [selectedTag, setSelectedTag] = useState('');
   const [newTag, setNewTag] = useState('');
@@ -89,10 +87,10 @@ const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
         // console.log('_file', _file);
         const fileData = new FormData();
         fileData.append('file', _file)
-      
+
+        // Upload files to file server
         const file = await uploadToFileServer(fileData);
         console.log('File uploaded:', file);
-        // setFileResponses((prevResponses) => [...prevResponses, file]);
         if (file) {
           fileResponses.push(file); 
         }
@@ -109,7 +107,6 @@ const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
             fileResponses.forEach(({ name, id }) => {
               formData.append('files', JSON.stringify({ name, id })); 
             });
- 
             const response = await fetch(`${ENV.API_URL}api/articles`, {
                 method: 'POST',
                 headers: {
