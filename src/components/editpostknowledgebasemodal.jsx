@@ -3,6 +3,8 @@
 import axios from 'axios';
 import React, { useEffect, useState, useRef } from 'react';
 
+import { BeatLoader, RingLoader } from 'react-spinners'; 
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faMinus, faTrash, faTimes, faUpload, faPenNib } from '@fortawesome/free-solid-svg-icons';
 
@@ -20,8 +22,8 @@ import useFetchToken from "../assets/js/fetchToken.js"
 
 const Editpostknowledgebasemodal = ({ show, handleClose, handleSubmit, item, refreshData, tagsArray}) => {
   if (!show) return null;
-
   //define states
+  const [uploading, setUploading] = useState(false);
   const [title, setTitle] = useState(item.title);
   const [tags, setTags] = useState([]);
   const [description, setDescription] = useState(item.description);
@@ -39,13 +41,10 @@ const Editpostknowledgebasemodal = ({ show, handleClose, handleSubmit, item, ref
   const [newTagSelect, setNewTagSelect] = useState('');
 
   const { token, isValid } = useFetchToken();
-  console.log('token', token);
-  console.log('isValid', isValid);
 
 
 
   useEffect(() => {
-    console.log("item:",item)
     setTitle(item.title);
     setTags(item.tags);
     setFile(item?.files);
@@ -59,33 +58,42 @@ const Editpostknowledgebasemodal = ({ show, handleClose, handleSubmit, item, ref
   }, [item]);
 
 
+
+  // Submit form and upload files and data
   const submitForm = async (event) => {
     event.preventDefault();
-
-    const formData = new FormData();
-    formData.append('title', title);
-    formData.append('description', description);
-    // formData.append('tags', newTag !== "" ? newTag : tags);
-    formData.append('tags', tags.join(", "));
-    formData.append('langs', JSON.stringify(selectedLanguages));
-    formData.append('deletedFiles', JSON.stringify(deleteFileArray)); 
-
-    console.log('tags joined', tags.join(", "));
-    console.log("Deleted Files:", deleteFileArray);
-
-    // Append each file to FormData
-    uploadedFile.forEach(file => {
-      formData.append('uploadedFiles', file); 
-    });
-    console.log('formData', formData);
-
     if (selectedLanguages.length === 0) {
       console.log('Choose at least one country');
       setErrorBoarderLang(true);
       return;
     } else {
+      setUploading(true);
+      const fileResponses = []
+      for (const _file of uploadedFile) {
+        // console.log('_file', _file);
+        const fileData = new FormData();
+        fileData.append('file', _file)
+
+        // Upload files to file server
+        const file = await uploadToFileServer(fileData);
+        console.log('File uploaded:', file);
+        if (file) {
+          fileResponses.push(file); 
+        }
+        console.log('fileResponses', fileResponses);
+      }
+
       // Updating news article 
-      console.log("Sending data to db")
+      const formData = new FormData();
+      formData.append('title', title);
+      formData.append('description', description);
+      formData.append('tags', tags.join(", "));
+      formData.append('langs', JSON.stringify(selectedLanguages));
+      formData.append('deletedFiles', JSON.stringify(deleteFileArray)); 
+      fileResponses.forEach(({ name, id }) => {
+        formData.append('uploadedFiles', JSON.stringify({ name, id })); 
+      });
+
       try {
         const response = await fetch(`${ENV.API_URL}api/articles/${item.id}`, {
             method: 'PUT',
@@ -99,81 +107,96 @@ const Editpostknowledgebasemodal = ({ show, handleClose, handleSubmit, item, ref
         console.log('response', response);
         console.log('data', data);
     
-          if (data.status = 502){
-            console.log("File Duplicate exists in database");
-            toast.error(data.error);
-          }
-      
+        if (data.status = 502){
+          console.log("File Duplicate exists in database");
+          toast.error(data.error);
+          setUploading(false);
+        }
         if (response.status === 200){
           refreshData();
           handleClose();
         }
       } catch (error) {
         console.error('Error updating news:', error);
+        setUploading(false);
       }
     }
-  };
+};
+
+const uploadToFileServer = async (fileData) => {
+  try {
+    const FTPresponse = await axios.post("https://fs.ebx.nu/upload", fileData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: `Admin ${token}`,
+      },
+    });
+    if (FTPresponse.status === 200) {
+      console.log('FTPresponse', FTPresponse);
+      return FTPresponse.data;  
+    }
+  } catch (error) {
+    console.error(`Upload attempt failed`, error);
+    setUploading(false);
+  }
+};
+
 
   
 
+// handle change description
 const handleChangeDescription = (value) => {
     console.log('description:', value);
     setDescription(value);
 };
-
-
+// handle change title
 const handleChangeTitle = (title) => {
-console.log('title:', title);
+  console.log('title:', title);
 setTitle(title);
 }
-
-
+// handle change checkbox - countries
 const handleCheckboxChange = (e) => {
-const { value, checked } = e.target;
-setErrorBoarderLang(false);
-if (value === 'All') {
-  setSelectedLanguages(
-    checked ? ['All', 'DK', 'DE', 'NO', 'FI', 'SE'] : []
-  );
-} else {
-  setSelectedLanguages((prevSelected) => {
-    const newSelected = checked
-      ? [...prevSelected, value]
-      : prevSelected.filter((langs) => langs !== value);
+  const { value, checked } = e.target;
+  setErrorBoarderLang(false);
+  if (value === 'All') {
+    setSelectedLanguages(
+      checked ? ['All', 'DK', 'DE', 'NO', 'FI', 'SE'] : []
+    );
+  } else {
+    setSelectedLanguages((prevSelected) => {
+      const newSelected = checked
+        ? [...prevSelected, value]
+        : prevSelected.filter((langs) => langs !== value);
 
-    if (newSelected.length === 5) {
-      return ['All', ...newSelected];
-    }
+      if (newSelected.length === 5) {
+        return ['All', ...newSelected];
+      }
 
-    return newSelected.filter((langs) => langs !== 'All');
-  });
-}
+      return newSelected.filter((langs) => langs !== 'All');
+    });
+  }
 };
-
-
-  const handleSelectChange = (event) => {
+// handle change tags
+const handleSelectChange = (event) => {
     console.log('select tag', event.target.value);
     setNewTagSelect(event.target.value);
 };
-
+// handle new tag
 const handleNewTagChange = (event) => {
     console.log('event.target.value', event.target.value);
     setNewTag(event.target.value);
 };
-
+// handle delete files
 const deleteFile = (fileName) => {
   console.log('adding file to delete filename array', fileName);
   setDeleteFileArray((prevArray) => [...prevArray, fileName]);
-  // setFile(prevFiles => prevFiles.filter(file => file.name !== fileName));
 };
-
-const handleFileChange = (file) => {
-  // const file = event.target.files[0]; 
+// handle file cahange
+const handleFileChange = (file) => { 
   console.log('file', file);
   if (file) {
     const maxSize = 210 * 1024 * 1024; 
     if (file.size > maxSize) {
-      console.log("Too large file");
       toast.error('File size cannot exceed 200 MB in file size');
       event.target.value = ''; 
     } else {
@@ -184,24 +207,31 @@ const handleFileChange = (file) => {
     console.log('No file selected.');
   }
 };
-
-
-  // add tag
-  const addTag = (tag) => {
-    console.log('tag', tag);
-    if (tag !== "" && !tags.includes(tag)){
-    setTags((prevArray) => [...prevArray, tag]);
-    setNewTag("");
-    }  else {
-      console.log('Tag already exists or is empty');
-    }
-  };
+// add tag
+const addTag = (tag) => {
+  console.log('tag', tag);
+  if (tag !== "" && !tags.includes(tag)){
+  setTags((prevArray) => [...prevArray, tag]);
+  setNewTag("");
+  }  else {
+    console.log('Tag already exists or is empty');
+  }
+};
 
 
 
 
   return (
     <div className="modal-overlay">
+
+      {uploading && (
+        <div className='uploading-box'> 
+         <BeatLoader className='mb-3' color="#000" loading={uploading} size={15} />
+          <h3><b>Uploading new data & files</b></h3> 
+          <h5>Please wait...</h5> 
+        </div>
+      )}
+
       <div className="modal-content">
       <div className='d-flex justify-content-between'>
           <h5 className="mb-3">Edit Article</h5>
@@ -262,8 +292,8 @@ const handleFileChange = (file) => {
                         </option>
                     ))}
                 </select>
-                <button className='standard add-button' title='Add Tag'  type="button"   onClick={() => addTag(newTagSelect)}> <FontAwesomeIcon icon={faPlus} /> </button>
-                <button className='standard add-button' title='Create New Tag'  type="button" onClick={() => setOpenNewTag(!openNewTag)} > <FontAwesomeIcon  icon={faPenNib} /> </button>
+                <button disabled={uploading} className='standard add-button' title='Add Tag'  type="button"   onClick={() => addTag(newTagSelect)}> <FontAwesomeIcon icon={faPlus} /> </button>
+                <button disabled={uploading} className='standard add-button' title='Create New Tag'  type="button" onClick={() => setOpenNewTag(!openNewTag)} > <FontAwesomeIcon  icon={faPenNib} /> </button>
             </div>
             {openNewTag && (
             <div className=''>

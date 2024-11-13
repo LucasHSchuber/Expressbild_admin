@@ -47,7 +47,7 @@ const Knowledgedetails = () => {
   console.log('isValid', isValid);
 
 
-  
+  // method to fetch data for spcific article with id
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -65,19 +65,18 @@ const Knowledgedetails = () => {
     setLoading(false);
     }
   };
-
+  useEffect(() => {
+    if (isValid) {
+      fetchData();
+    }
+  }, [token, isValid]);
+  // method to fetch existing tags
   const getTags = async () => {
     const fetchedTags = await fetchTags();
     setTags(fetchedTags); 
     console.log('fetchedTags', fetchedTags);
     setLoading(false);
   };
-
-  useEffect(() => {
-    if (isValid) {
-      fetchData();
-    }
-  }, [token, isValid]);
 
 
 
@@ -86,13 +85,6 @@ const Knowledgedetails = () => {
     let fileURL = 'https://fs.ebx.nu/view/' + file_server_id
     window.open(fileURL);
   };
-
-  function base64ToBlob(base64, contentType = 'application/pdf') {
-    const byteCharacters = atob(base64);
-    const byteNumbers = Array.from(byteCharacters).map(char => char.charCodeAt(0));
-    const byteArray = new Uint8Array(byteNumbers);
-    return new Blob([byteArray], { type: contentType });
-  }
 
 
 

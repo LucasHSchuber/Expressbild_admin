@@ -57,3 +57,24 @@
 .modal-content h5 {
   font-weight: 600;
 }
+
+/* modal-loader */
+.loader-upload{
+  position: fixed;
+
+  
+  color: red;
+  background-color: green;
+  border-color: purple;
+}
+
+.uploading-box{
+  z-index: 10;
+  position: fixed;
+  width: 45em;
+  height: 70vh;
+  background-color: white !important;
+  opacity: 0.9;
+  text-align: center;
+  padding-top: 22vh;
+}

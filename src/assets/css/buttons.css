@@ -12,7 +12,7 @@
 }
 .standard {
   background-color: rgb(28, 28, 28);
-  color: rgb(234, 234, 234);
+  color: rgb(255, 255, 255);
   transition: 0.1s;
 }
 .standard:hover {
@@ -52,7 +52,7 @@
 }
 .edit {
   background-color: rgb(255, 179, 0);
-  color: white;
+  color: rgb(255, 255, 255);
 }
 .closemodal-button{
   font-size: 1.15em;

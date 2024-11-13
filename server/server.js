@@ -246,18 +246,20 @@ app.post('/api/articles', upload.array('files'), (req, res) => {
       }
 
       // Insert files
-      // Ensure files is an array even if only one file
-      const filesArray = Array.isArray(files) ? files : [files];
-      const parsedFiles = filesArray.map(file => JSON.parse(file));
-      if (parsedFiles && parsedFiles.length > 0) { 
-      const insertFilesQuery = 'INSERT INTO kb_article_files (article_id, file_server_id, filename, created_at) VALUES ?';
-      const filesValues = parsedFiles.map(file => [articleId, file.id, file.name, new Date()]);
-      db.query(insertFilesQuery, [filesValues], (error) => {
-        if (error) {
-          console.error('SQL error:', error); 
-          return res.status(500).json({ error: 'An error occurred while adding files.' });
-        }
-      });
+      if (files){
+        // Ensure files is an array even if only one file
+        const filesArray = Array.isArray(files) ? files : [files];
+        const parsedFiles = filesArray.map(file => JSON.parse(file));
+        if (parsedFiles && parsedFiles.length > 0) { 
+        const insertFilesQuery = 'INSERT INTO kb_article_files (article_id, file_server_id, filename, created_at) VALUES ?';
+        const filesValues = parsedFiles.map(file => [articleId, file.id, file.name, new Date()]);
+        db.query(insertFilesQuery, [filesValues], (error) => {
+          if (error) {
+            console.error('SQL error:', error); 
+            return res.status(500).json({ error: 'An error occurred while adding files.' });
+          }
+        });
+      }
     }
 
     res.status(201).json({ message: 'Article added successfully.', articleId });
@@ -266,20 +268,14 @@ app.post('/api/articles', upload.array('files'), (req, res) => {
 
 
 
+
 // Route to update an article
 app.put("/api/articles/:id", upload.array('uploadedFiles'), async (req, res) => {
   const { title, description, tags, langs, deletedFiles, uploadedFiles } = req.body;
   const articleId = req.params.id;
-  console.error("deletedFiles", deletedFiles);
-  console.error("uploadedFiles", uploadedFiles);
-  console.log("Type of deletedFiles:", typeof deletedFiles);
-  console.log("Is Array:", Array.isArray(deletedFiles));
-  
-   // Parse JSON strings in `req.body`
-   const parsedDeletedFiles = JSON.parse(deletedFiles || '[]');
-
-   console.log("deletedFiles Parsed:", parsedDeletedFiles);
-   console.log("uploadedFiles", req.files);
+   
+  // parse deleted files
+   const parsedDeletedFiles = JSON.parse(deletedFiles || '[]'); 
 
   if (!title || !description) {
     return res.status(400).json({ error: 'Title and description are required.' });
@@ -301,29 +297,27 @@ app.put("/api/articles/:id", upload.array('uploadedFiles'), async (req, res) => 
     const langsArray = JSON.parse(langs);
     await updateLangs(articleId, langsArray);
 
-  // Handle deleted files
-  if (parsedDeletedFiles.length > 0) {
-    await deleteFiles(articleId, parsedDeletedFiles);
-  }
-
-  //  // Handle uploaded files
-  //  if (req.files && req.files.length > 0) {
-  //   await addFiles(articleId, req.files);
-  // }
-  // Handle uploaded files
-  if (req.files && req.files.length > 0) {
-    const result = await addFiles(articleId, req.files);
-    if (result.error) {
-      // Send error message for duplicates
-      return res.status(400).json({ error: result.error });
-    } 
-  }
-
+    // Handle deleted files
+    if (parsedDeletedFiles.length > 0) {
+      await deleteFiles(articleId, parsedDeletedFiles);
+    }
+    // Handle uploaded files
+    if (uploadedFiles && uploadedFiles.length > 0) {
+         // parse added files
+        const filesArray = Array.isArray(uploadedFiles) ? uploadedFiles : [uploadedFiles];
+        const parsedFiles = filesArray.map(file => JSON.parse(file));
+        
+        const result = await addFiles(articleId, parsedFiles);
+      if (result.error) {
+        // Send error message for duplicates
+        return res.status(400).json({ error: result.error });
+      } 
+    }
     // Success response
     res.status(200).json({ message: 'Article, tags, and langs updated successfully.', status: 200 });
   } catch (error) {
-    console.error('Error updating article:', error);  
-    res.status(500).json({ error: 'An error occurred while updating the article.' });
+      console.error('Error updating article:', error);  
+      res.status(500).json({ error: 'An error occurred while updating the article.' });
   }
 });
 // Function to delete files
@@ -346,16 +340,9 @@ const deleteFiles = async (articleId, deletedFiles) => {
 // Function to add new files
 const addFiles = async (articleId, uploadedFiles) => {
   const filenames = uploadedFiles.map(file => file.originalname);
-
   // Query to check for existing filenames
   const placeholders = filenames.map(() => '?').join(',');
-  const checkExistingFilesQuery = `
-    SELECT filename 
-    FROM kb_article_files 
-    WHERE article_id = ? 
-    AND filename IN (${placeholders})
-  `;
-
+  const checkExistingFilesQuery = `SELECT filename FROM kb_article_files WHERE article_id = ? AND filename IN (${placeholders})`;
   try {
     // Check for existing filenames
     const existingFiles = await executeQuery(checkExistingFilesQuery, [articleId, ...filenames]);
@@ -370,18 +357,12 @@ const addFiles = async (articleId, uploadedFiles) => {
     }
 
     // Prepare data for insertion
-    const insertFilesQuery = 'INSERT INTO kb_article_files (article_id, filename, filepath, created_at) VALUES ?';
-    const fileValues = uploadedFiles.map(file => [
-      articleId,
-      file.originalname, 
-      file.buffer.toString('base64'), 
-      new Date() 
-    ]);
+    const insertFilesQuery = 'INSERT INTO kb_article_files (article_id, file_server_id, filename, created_at) VALUES ?';
+    const fileValues = uploadedFiles.map(file => [articleId, file.id, file.name, new Date()]);
 
     // Insert new files
     await executeQuery(insertFilesQuery, [fileValues]);
     return { status: 200, message: 'Files added successfully.' };
-  
   } catch (error) {
     console.error('Error in addFiles:', error);
     throw new Error('An error occurred while adding files.');
@@ -423,6 +404,7 @@ const updateLangs = async (articleId, langs) => {
     await executeQuery(insertLangsQuery, [langsData]);
   }
 };
+
 
 
 

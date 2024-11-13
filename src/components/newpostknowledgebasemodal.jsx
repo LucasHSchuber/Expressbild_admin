@@ -3,6 +3,8 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 
+import { BeatLoader, RingLoader } from 'react-spinners'; 
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes, faPlus, faMinus, faTrash, faUpload, faPenNib } from '@fortawesome/free-solid-svg-icons';
 
@@ -21,6 +23,7 @@ import useFetchToken from "../assets/js/fetchToken.js"
 const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
   if (!show) return null;
   //define states
+  const [uploading, setUploading] = useState(false);
   const [selectedLanguages, setSelectedLanguages] = useState([]);
   const [file, setFile] = useState([]);
   const [tagsArray, setTagsArray] = useState([]);
@@ -75,11 +78,9 @@ const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
     }
   };
 
-
-
-
   //submitting post
   const handleSubmitPost = async (post) => {
+    setUploading(true);
     const fileResponses = []
     console.log('Post submitted:', post);
     // Step 1: Upload file/files to FTP
@@ -118,14 +119,17 @@ const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
             if (!response.ok) {
               console.log('Response not ok', response);
               console.log('Response not ok', result);
+              setUploading(false);
               throw new Error('Network response was not ok');
             }
             console.log('Article added:', result);
             handleClose();
             setTagsArray([]);
             refreshData();
+            setUploading(false);
     } else{
       console.log('error adding file to File-server', error);
+      setUploading(false);
     }
   };
 
@@ -143,6 +147,7 @@ const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
         }
       } catch (error) {
         console.error(`Upload attempt failed`, error);
+        setUploading(false);
       }
   };
   
@@ -217,7 +222,16 @@ const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
 
   return (
     <div className="modal-overlay">
-      <div className="modal-content">
+
+      {uploading && (
+        <div className='uploading-box'> 
+         <BeatLoader className='mb-3' color="#000" loading={uploading} size={15} />
+          <h3><b>Uploading data & files</b></h3> 
+          <h5>Please wait...</h5> 
+        </div>
+      )}
+     
+      <div className="modal-content"> 
         <div className='d-flex justify-content-between'>
           <h5 className="mb-3">Knowledge Base: Create new article</h5>
           <h6 
@@ -272,8 +286,8 @@ const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
                         </option>
                     ))}
                 </select>
-                <button className='standard add-button' title='Add Tag'  type="button"  onClick={() => addTag(selectedTag)}>  <FontAwesomeIcon icon={faPlus} /> </button>
-                <button className='standard add-button' title='Create New Tag'  type="button"  onClick={() => setOpenNewTag(!openNewTag)}><FontAwesomeIcon  icon={faPenNib} /></button>
+                <button disabled={uploading} className='standard add-button' title='Add Tag'  type="button"  onClick={() => addTag(selectedTag)}>  <FontAwesomeIcon icon={faPlus} /> </button>
+                <button disabled={uploading} className='standard add-button' title='Create New Tag'  type="button"  onClick={() => setOpenNewTag(!openNewTag)}><FontAwesomeIcon  icon={faPenNib} /></button>
                 {tagsArray.length > 0 && (
                   <div className='ml-2'>
                   {/* <h6><b>Tags:</b></h6> */}
@@ -297,7 +311,9 @@ const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
                     value={newTag}
                     onChange={handleNewTagChange} 
                 />
-                <button className='standard add-button' title='Add Tag'  type="button"  onClick={() => addTag(newTag)}> <FontAwesomeIcon icon={faPlus} /> </button>
+                {/* {newTag.length > 0 && ( */}
+                  <button className='standard add-button' title='Add Tag'  type="button"  onClick={() => addTag(newTag)}> <FontAwesomeIcon icon={faPlus} /> </button>
+                {/* )} */}
             </div>
             )}
         </div>
