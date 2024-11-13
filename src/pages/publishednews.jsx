@@ -54,9 +54,7 @@ const Publishednews = () => {
     //fetching all news
     const fetchNews = async () => {
       try {
-        const response = await axios.get(
-          '/api/index.php/rest/photographer_portal/news',
-          {
+        const response = await axios.get('/api/index.php/rest/photographer_portal/news', {
             headers: {
               Authorization: `Admin ${token}`,
               'Content-Type': 'application/json',
@@ -194,6 +192,7 @@ const Publishednews = () => {
 
   //delete confrim
   const handleDeleteClick = (newsId) => {
+    console.log('newsId', newsId);
     const userConfirmed = window.confirm(
       'Are you sure you want to delete this news item?'
     );
@@ -201,15 +200,11 @@ const Publishednews = () => {
       deleteNews(newsId);
     }
   };
-
   //delete news from database
   const deleteNews = async (id) => {
     console.log('deleted news id:', id);
-    // const token = '666ab2a5be8ee1.66302861';
     try {
-      const responseDelete = await axios.delete(
-        `/api/index.php/rest/photographer_portal/news/${id}`,
-        {
+      const responseDelete = await axios.delete(`/api/index.php/rest/photographer_portal/news/${id}`, {
           headers: {
             Authorization: `Admin ${token}`,
           },
@@ -342,7 +337,7 @@ const Publishednews = () => {
                      className='delete-article-button'
                      onClick={(e) => {
                        e.stopPropagation();
-                       handleDeleteClick(item.id);
+                       handleDeleteClick(item.news.id);
                      }}
                      >
                     <FontAwesomeIcon
