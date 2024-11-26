@@ -410,20 +410,20 @@ const Recentshot = () => {
                                   <div style={{ paddingTop: '1.5em' }}>
                                     <div className="mb-4  control-sheet-headers">
                                       <h6>
-                                        <strong>Activity name</strong>
+                                        <strong>Activity name: </strong>
                                         {dataForControlSheet?.activity ?.project_name}
                                         {dataForControlSheet?.activity ?.activity_name}
                                       </h6>
                                       <h6>
-                                        <strong>Photographer</strong>{dataForControlSheet?.photographer?.firstname}
+                                        <strong>Photographer: </strong>{dataForControlSheet?.photographer?.firstname}
                                         {dataForControlSheet?.photographer ?.surname}
                                       </h6>
                                       <h6>
-                                        <strong>Activity date</strong>
+                                        <strong>Activity date: </strong>
                                         {dataForControlSheet?.activity?.activity_start?.substring(0,10)}
                                       </h6>
                                       <h6>
-                                        <strong>Check point</strong>
+                                        <strong>Check point: </strong>
                                         <a
                                           href={`https://${dataForControlSheet?.photographer ?.lang === 'SE'
                                               ? 'shop.expressbild.se'
