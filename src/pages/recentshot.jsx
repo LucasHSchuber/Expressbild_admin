@@ -4,11 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faArrowDownWideShort,
-  faCheck,
-  faXmark,
-} from '@fortawesome/free-solid-svg-icons';
+import {faArrowDownWideShort, faCheck, faXmark } from '@fortawesome/free-solid-svg-icons';
 
 import '../assets/css/main_recentshot.css';
 import '../assets/css/global.css';
@@ -42,16 +38,14 @@ const Recentshot = () => {
     //fetching all users
     const fetchUsers = async () => {
       try {
-        const responseUsers = await axios.get(
-          '/api/index.php/rest/photographer_portal/users',
-          {
+        const responseUsers = await axios.get('/api/index.php/rest/photographer_portal/users', {
             headers: {
               Authorization: `Admin ${token}`,
               'Content-Type': 'application/json',
             },
           }
         );
-        console.log('Fetched users:', responseUsers.data.result);
+        console.log('Fetched users from "/users":', responseUsers.data.result);
         setUsers(responseUsers.data.result);
       } catch (error) {
         console.error('Error fetching users:', error);
@@ -59,10 +53,14 @@ const Recentshot = () => {
     };
     const fetchProjects = async () => {
       try {
-        let response = await axios.get(
-          'api/index.php/rest/teamleader/projects'
+        let response = await axios.get('api/index.php/rest/teamleader/projects', {
+            headers: {
+              Authorization: `Admin ${token}`,
+              'Content-Type': 'application/json',
+            },
+          }
         );
-
+        console.log('response from "/projects"', response);
         if (response && response.data) {
           console.log('Fetched projects:', response.data.result);
           return response.data; // Return the fetched data
@@ -76,24 +74,18 @@ const Recentshot = () => {
     };
     const fetchActivities = async () => {
       try {
-        let responseActivities = await axios.get(
-          'api/index.php/rest/photographer_portal/activities',
-          {
+        let responseActivities = await axios.get('api/index.php/rest/photographer_portal/activities', {
             headers: {
               Authorization: `Admin ${token}`,
               'Content-Type': 'application/json',
             },
           }
         );
-
+        console.log("responseActivities from /activities", responseActivities)
         if (responseActivities && responseActivities.data) {
           console.log('Fetched activites:', responseActivities.data.result);
           setAllActivites(responseActivities.data.result);
-          const latestActivities = getLatestActivities(
-            responseActivities.data.result
-          );
-
-          // const latestActivitiesSE = latestActivities.filter(l => l.photographer.lang === "SE")
+          const latestActivities = getLatestActivities(responseActivities.data.result);
 
           console.log('Latest activities:', latestActivities);
           setLatestActivities(latestActivities);
@@ -119,6 +111,7 @@ const Recentshot = () => {
 
 
 
+  
   const getLatestActivities = (data) => {
     console.log(data);
     const latestActivities = {};
@@ -139,35 +132,29 @@ const Recentshot = () => {
     return Object.values(latestActivities);
   };
 
+
+
   const handleSearchChange = (e) => {
     console.log(e.target.value);
     setSearchString(e.target.value.toLowerCase());
   };
 
   //if search is entered
-  useEffect(() => {
-
     const fetchSearchActivities = async () => {
       try {
-        let responseActivities = await axios.get(
-          'api/index.php/rest/photographer_portal/activities',
-          {
+        let responseActivities = await axios.get('api/index.php/rest/photographer_portal/activities',{
             headers: {
               Authorization: `Admin ${token}`,
               'Content-Type': 'application/json',
             },
-          }
-        );
-
+        });
+        console.log('responseActivities from "activities"', responseActivities);
         if (responseActivities && responseActivities.data) {
           console.log('Fetched activities:', responseActivities.data.result);
 
-          let latestActivities = getLatestActivities(
-            responseActivities.data.result
-          );
+          let latestActivities = getLatestActivities(responseActivities.data.result);
 
-          console.log('Latest activities:', latestActivities);
-
+          console.log('latestActivities:', latestActivities);
           if (searchString !== '') {
             latestActivities = latestActivities.filter((searchData) => {
               const fullName = `${searchData.photographer.firstname.toLowerCase()} ${searchData.photographer.surname.toLowerCase()}`;
@@ -195,8 +182,13 @@ const Recentshot = () => {
       }
     };
 
-    fetchSearchActivities();
-  }, [searchString, selectedCountry]);
+    useEffect(() => {
+      if (isValid) {
+        fetchSearchActivities();
+      }
+    }, [searchString, selectedCountry]);
+
+
 
   //handleChangeCountry
   const handleChangeCountry = (e) => {
@@ -294,9 +286,7 @@ const Recentshot = () => {
        </div>
       {/* select box */}
       <div className="mb-2">
-        <label htmlFor="country" style={{ fontSize: '0.9em' }}>
-          <b>Country:{' '}</b>
-        </label>
+        <label htmlFor="country" style={{ fontSize: '1.2em' }}>Country:</label>
         <select
           id="country"
           className="select-box"
@@ -328,7 +318,7 @@ const Recentshot = () => {
         <thead>
           <tr>
             <th>
-              Photographer:{' '}
+              Photographer
               <FontAwesomeIcon
                 title='Sort on Photographer'
                 className="sort-button"
@@ -336,9 +326,9 @@ const Recentshot = () => {
                 onClick={() => orderByPhotographer()}
               />
             </th>
-            <th>Email:</th>
+            <th>Email</th>
             <th>
-              Last job:{' '}
+              Last job
               <FontAwesomeIcon
                 title='Sort Last Job'
                 className="sort-button"
@@ -368,12 +358,14 @@ const Recentshot = () => {
                     <td colSpan="3" className="expanded-inner-table">
                       <div className="flex-container">
                         <div className="flex-item left-inner-table">
-                          <h6 className='mt-3' style={{ fontSize: "1em" }}><b>All activites by {item.photographer.firstname} {item.photographer.surname}:</b> <br></br><em>Click on an activity to open control sheet</em></h6>
+                          {/* <h6 className='mt-3' style={{ fontSize: "1.3em" }}><b>All activites by {item.photographer.firstname} {item.photographer.surname}:</b> <br></br>
+                            <em>Click on an activity to open control sheet</em>
+                          </h6> */}
                           <table className="control-sheet-table">
                             <thead>
                               <tr>
-                                <th>Activity:</th>
-                                <th>Date:</th>
+                                <th>Activity</th>
+                                <th>Date</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -414,47 +406,26 @@ const Recentshot = () => {
                                 key={`${dataForControlSheet?.photographer?.id}-details`}
                                  className='control-sheet-box'
                               >
-                                <td
-                                  colSpan="4"
-                                  className="inner-table-td"
-                                >
+                                <td colSpan="4" className="inner-table-td">
                                   <div style={{ paddingTop: '1.5em' }}>
                                     <div className="mb-4  control-sheet-headers">
                                       <h6>
-                                        <strong>Activity name:</strong>{' '}
-                                        {
-                                          dataForControlSheet?.activity
-                                            ?.project_name
-                                        }{" "} 
-                                        {
-                                          dataForControlSheet?.activity
-                                            ?.activity_name
-                                        }
+                                        <strong>Activity name</strong>
+                                        {dataForControlSheet?.activity ?.project_name}
+                                        {dataForControlSheet?.activity ?.activity_name}
                                       </h6>
                                       <h6>
-                                        <strong>Photographer:</strong>{' '}
-                                        {
-                                          dataForControlSheet?.photographer
-                                            ?.firstname
-                                        }{' '}
-                                        {
-                                          dataForControlSheet?.photographer
-                                            ?.surname
-                                        }
+                                        <strong>Photographer</strong>{dataForControlSheet?.photographer?.firstname}
+                                        {dataForControlSheet?.photographer ?.surname}
                                       </h6>
                                       <h6>
-                                        <strong>Activity date:</strong>{' '}
-                                        {dataForControlSheet?.activity?.activity_start?.substring(
-                                          0,
-                                          10
-                                        )}
+                                        <strong>Activity date</strong>
+                                        {dataForControlSheet?.activity?.activity_start?.substring(0,10)}
                                       </h6>
                                       <h6>
-                                        <strong>Check point:</strong>{' '}
+                                        <strong>Check point</strong>
                                         <a
-                                          href={`https://${
-                                            dataForControlSheet?.photographer
-                                              ?.lang === 'SE'
+                                          href={`https://${dataForControlSheet?.photographer ?.lang === 'SE'
                                               ? 'shop.expressbild.se'
                                               : dataForControlSheet
                                                     ?.photographer?.lang ===
@@ -475,22 +446,20 @@ const Recentshot = () => {
                                                       : ''
                                           }/admin/prophoto/jobs/report.php?jobid=${dataForControlSheet?.activity?.project_uuid}&activity=#/tab/8?extra=0&extra2=1`}
                                           target="_blank"
-                                          style={{
-                                            textDecoration: 'underline',
-                                            color: 'blue',
-                                            cursor: 'pointer',
+                                          style={{ textDecoration: 'underline', color: 'blue', cursor: 'pointer',
                                           }}
                                         >
                                           Click here to navigate to checkpoint
-                                        </a>{' '}
+                                        </a>
                                       </h6>
                                     </div>
                                     <table className="control-sheet-table">
                                       <thead>
                                         <tr>
-                                          <th>Team/class name:</th>
-                                          <th>Portrait:</th>
-                                          <th>Group:</th>
+                                          <th>Team/class name</th>
+                                          <th>Portrait</th>
+                                          <th>Group</th>
+                                          <th>Calendar</th>
                                         </tr>
                                       </thead>
                                       <tbody>
@@ -500,29 +469,31 @@ const Recentshot = () => {
                                               <td>{team.team}</td>
                                               <td>
                                                 {team.took_portrait === true ? (
-                                                  <FontAwesomeIcon
-                                                    icon={faCheck}
-                                                    style={{ color: 'green' }}
+                                                  <FontAwesomeIcon icon={faCheck} style={{ color: 'green' }}
                                                   />
                                                 ) : (
-                                                  <FontAwesomeIcon
-                                                    icon={faXmark}
-                                                    style={{ color: 'red' }}
+                                                  <FontAwesomeIcon icon={faXmark} style={{ color: 'red' }}
                                                   />
                                                 )}
                                               </td>
                                               <td>
                                                 {team.took_group === true ? (
-                                                  <FontAwesomeIcon
-                                                    icon={faCheck}
-                                                    style={{ color: 'green' }}
+                                                  <FontAwesomeIcon icon={faCheck} style={{ color: 'green' }}
                                                   />
                                                 ) : (
-                                                  <FontAwesomeIcon
-                                                    icon={faXmark}
-                                                    style={{ color: 'red' }}
+                                                  <FontAwesomeIcon icon={faXmark} style={{ color: 'red' }}
                                                   />
                                                 )}
+                                              </td>
+                                              <td>
+                                              {team.num_calendars > 0 ? (
+                                                  <FontAwesomeIcon icon={faCheck} style={{ color: 'green' }}
+                                                  />
+                                                ) : (
+                                                  <FontAwesomeIcon icon={faXmark} style={{ color: 'red' }}
+                                                  />
+                                                )}
+                                                {/* {" "}{team.num_calendars}/{team.num_players} */}
                                               </td>
                                             </tr>
                                           )
@@ -535,10 +506,7 @@ const Recentshot = () => {
                                           <strong>Anomaly report:</strong>{' '}
                                         </h6>
                                         <h6>
-                                          {dataForControlSheet?.reports.length >
-                                          0 ? (
-                                            dataForControlSheet?.reports[0]
-                                              ?.text
+                                          {dataForControlSheet?.reports.length > 0 ? ( dataForControlSheet?.reports[0] ?.text
                                           ) : (
                                             <em>Empty</em>
                                           )}
@@ -549,10 +517,7 @@ const Recentshot = () => {
                                           <strong>Merged teams:</strong>{' '}
                                         </h6>
                                         <h6>
-                                          {dataForControlSheet?.project
-                                            ?.merged_teams ? (
-                                            dataForControlSheet?.project
-                                              ?.merged_teams
+                                          {dataForControlSheet?.project ?.merged_teams ? ( dataForControlSheet?.project ?.merged_teams
                                           ) : (
                                             <em>Empty</em>
                                           )}

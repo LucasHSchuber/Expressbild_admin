@@ -80,7 +80,7 @@ const Knowledgedetails = () => {
 
 
 
-  // Decode base64 string and create Blob URL
+  // View file from file-server
   const viewFile = async (file_server_id) => {
     let fileURL = 'https://fs.ebx.nu/view/' + file_server_id
     window.open(fileURL);

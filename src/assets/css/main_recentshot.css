@@ -4,11 +4,12 @@
 /* search bar */
 .search-bar {
   width: 26em;
-  height: 2.8em;
+  height: 3em;
   font-size: 0.9em;
   padding-left: 0.6em;
   border-radius: 30px;
   border: 1px solid rgb(61, 61, 61);
+  font-size: 1.1em;
 }
 
 .search-bar:focus {
@@ -20,21 +21,30 @@
   width: 10em;
   margin: 0 0 0 0.7em;
   font-size: 0.9em;
-  height: 2.3em;
+  font-size: 1.1em;
+  height: 3em;
   border-radius: 2px;
   border: 1px solid rgb(61, 61, 61);
+  padding-left: 0.3em;
 }
 
+.table tr th{
+  font-size: 1.2em !important;
+}
+
+.control-sheet-table tr th{
+  background-color: rgb(249, 249, 249) !important;
+}
 .control-sheet-table {
   margin-top: 20px;
+  font-size: 1.2em !important;
 }
-
 .control-sheet-table tbody tr td {
   padding: 6px 15px;
 }
 
 .outer-tr {
-  font-size: 1em !important;
+  font-size: 1.2em !important;
 }
 .outer-tr:hover {
   background-color: #f7f7f7;
@@ -42,7 +52,8 @@
 }
 
 .expanded-inner-table {
-  background-color: #f9fdff;
+  /* background-color: #f9fdff;  */
+  background-color: rgb(249, 249, 249) !important;
   border: 1px solid #dedede;
   padding: 1em 2.5em 4em 2.5em !important;
   font-size: 0.9em !important;
@@ -80,11 +91,12 @@
   cursor: pointer;
 }
 .expanded-inner-tr:hover {
-  background-color: #f7f7f7;
+  background-color: #eeeeee;
 }
 .selected-inner-tr {
-  background-color: #f7f7f7;
+  background-color: #eeeeee;
 }
+
 
 /* when clicking on a row in main table */
 .selected-tr {
@@ -92,7 +104,7 @@
 }
 
 .control-sheet-headers h6 {
-  font-size: 1em;
+  font-size: 1.2em;
 }
 
 .flex-container {
