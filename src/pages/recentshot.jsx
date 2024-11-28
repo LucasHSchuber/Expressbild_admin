@@ -248,8 +248,9 @@ const Recentshot = () => {
   };
 
   //handle inner table inner row click
-  const handleInnerRowClick = (photographerId) => {
-    setExpandedInnerRow(expandedInnerRow === photographerId ? null : photographerId);
+  const handleInnerRowClick = (activity_id) => {
+    console.log('activity_id', activity_id);
+    setExpandedInnerRow(expandedInnerRow === activity_id ? null : activity_id);
   };
 
   const handleChangeControlSheet = (e) => {
@@ -374,9 +375,9 @@ const Recentshot = () => {
                                   .sort((a, b) => new Date(b.activity.activity_start) - new Date(a.activity.activity_start))
                                   .map((a) => (
                                   <tr
-                                    key={a.activity.project_uuid}
-                                    className={`expanded-inner-tr ${a.activity.project_uuid === expandedInnerRow ? "selected-inner-tr" : "" }`}
-                                    onClick={() => {handleChangeControlSheet(a); handleInnerRowClick(a.activity.project_uuid)}}
+                                    key={a.activity.project_uuid + a.project.activity_uuid}
+                                    className={`expanded-inner-tr ${a.project.activity_uuid === expandedInnerRow ? "selected-inner-tr" : "" }`}
+                                    onClick={() => {handleChangeControlSheet(a); handleInnerRowClick(a.project.activity_uuid)}}
                                   >
                                     <td title={a.activity.project_name + " " + a.activity.activity_name} >
                                       {a.activity.project_name.length > 30 ? a.activity.project_name.substring(0, 30) + ".." : a.activity.project_name}{' '}
