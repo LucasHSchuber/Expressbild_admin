@@ -13,6 +13,11 @@ import '../assets/css/components.css';
 
 import useFetchToken from "../assets/js/fetchToken.js"
 
+import ENV from "../../env.js"
+console.log('ENV', ENV);
+console.log('ENV.isProduction', ENV.isProduction);
+
+
 
 const Newpostmodal = ({ show, handleClose, refreshData }) => {
   if (!show) return null;
@@ -69,10 +74,7 @@ const Newpostmodal = ({ show, handleClose, refreshData }) => {
   const handleSubmitPost = async (post) => {
     console.log('Post submitted:', post);
     try {
-      const response = await axios.post(
-        '/api/index.php/rest/photographer_portal/news',
-        post,
-        {
+      const response = await axios.post(`${ENV.isProduction ? "https://backend.expressbild.org" : "/api"}/index.php/rest/photographer_portal/news`, post, {
           headers: {
             Authorization: `Admin ${token}`,
             'Content-Type': 'application/json',

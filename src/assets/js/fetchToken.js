@@ -3,6 +3,10 @@ import axios from 'axios'; // Import axios
 
 // Import env var
 import ENV from "../../../env.js";
+console.log('ENV', ENV);
+console.log('ENV.API_URL', ENV.API_URL);
+
+
 
 const useFetchToken = () => {
   const [token, setToken] = useState(null);
@@ -41,9 +45,7 @@ const useFetchToken = () => {
   const validateToken = async (token) => {
     // console.log("Validating token:", token);
     try {
-      const response = await axios.get(
-        `/api/index.php/rest/auth/validate_token/${token}`,
-        {
+      const response = await axios.get(`${ENV.isProduction ? "https://backend.expressbild.org" : "/api"}/index.php/rest/auth/validate_token/${token}`, {
           headers: {
             'Content-Type': 'application/json',
           },

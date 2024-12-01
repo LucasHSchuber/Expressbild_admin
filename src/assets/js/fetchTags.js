@@ -6,6 +6,8 @@ import ENV from '../../../env.js';
 console.log('ENV', ENV);
 console.log('ENV.API_URL', ENV.API_URL);
 
+
+
 const fetchTags = async () => {
   try {
     const response = await axios.get(`${ENV.API_URL}api/articles/tags`);

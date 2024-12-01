@@ -6,6 +6,10 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Newpostbutton from '../components/newpostbutton';
 import Newpostmodal from '../components/newpostmodal';
 
+import ENV from "../../env.js"
+console.log('ENV', ENV);
+console.log('ENV.isProduction', ENV.isProduction);
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faT,
@@ -54,7 +58,7 @@ const Publishednews = () => {
     //fetching all news
     const fetchNews = async () => {
       try {
-        const response = await axios.get('/api/index.php/rest/photographer_portal/news', {
+        const response = await axios.get(`${ENV.isProduction ? "https://backend.expressbild.org" : "/api"}/index.php/rest/photographer_portal/news`, {
             headers: {
               Authorization: `Admin ${token}`,
               'Content-Type': 'application/json',
@@ -71,9 +75,7 @@ const Publishednews = () => {
     //fetching all users
     const fetchUsers = async () => {
       try {
-        const responseUsers = await axios.get(
-          '/api/index.php/rest/photographer_portal/users',
-          {
+        const responseUsers = await axios.get(`${ENV.isProduction ? "https://backend.expressbild.org" : "/api"}/index.php/rest/photographer_portal/users`, {
             headers: {
               Authorization: `Admin ${token}`,
               'Content-Type': 'application/json',
@@ -91,9 +93,7 @@ const Publishednews = () => {
     //fetching all read post
     const fetchReadAllNews = async () => {
       try {
-        const responseRead = await axios.get(
-          '/api/index.php/rest/photographer_portal/newsread',
-          {
+        const responseRead = await axios.get(`${ENV.isProduction ? "https://backend.expressbild.org" : "/api"}/index.php/rest/photographer_portal/newsread`,{
             headers: {
               Authorization: `Admin ${token}`,
               'Content-Type': 'application/json',
@@ -204,7 +204,7 @@ const Publishednews = () => {
   const deleteNews = async (id) => {
     console.log('deleted news id:', id);
     try {
-      const responseDelete = await axios.delete(`/api/index.php/rest/photographer_portal/news/${id}`, {
+      const responseDelete = await axios.delete(`${ENV.isProduction ? "https://backend.expressbild.org" : "/api"}/index.php/rest/photographer_portal/news/${id}`, {
           headers: {
             Authorization: `Admin ${token}`,
           },

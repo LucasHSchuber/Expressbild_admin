@@ -3,13 +3,12 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 
+import ENV from "../../env.js"
+console.log('ENV', ENV);
+console.log('ENV.isProduction', ENV.isProduction);
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faCaretLeft,
-  faPenToSquare,
-  faTrashAlt,
-} from '@fortawesome/free-solid-svg-icons';
+import { faCaretLeft, faPenToSquare, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 
 import Editpostmodal from '../components/editpostmodal';
 import useFetchToken from "../assets/js/fetchToken.js"
@@ -50,9 +49,7 @@ const Newsdetails = () => {
       // Fetch news
       const fetchNews = async () => {
         try {
-          const response = await axios.get(
-            '/api/index.php/rest/photographer_portal/news',
-            {
+          const response = await axios.get(`${ENV.isProduction ? "https://backend.expressbild.org" : "/api"}/index.php/rest/photographer_portal/news`, {
               headers: {
                 Authorization: `Admin ${token}`,
                 'Content-Type': 'application/json',
@@ -69,9 +66,7 @@ const Newsdetails = () => {
       // Fetch users
       const fetchUsers = async () => {
         try {
-          const responseUsers = await axios.get(
-            '/api/index.php/rest/photographer_portal/users',
-            {
+          const responseUsers = await axios.get(`${ENV.isProduction ? "https://backend.expressbild.org" : "/api"}/index.php/rest/photographer_portal/users`, {
               headers: {
                 Authorization: `Admin ${token}`,
                 'Content-Type': 'application/json',
@@ -88,9 +83,7 @@ const Newsdetails = () => {
       // Fetch read news
       const fetchReadAllNews = async () => {
         try {
-          const responseRead = await axios.get(
-            '/api/index.php/rest/photographer_portal/newsread',
-            {
+          const responseRead = await axios.get(`${ENV.isProduction ? "https://backend.expressbild.org" : "/api"}/index.php/rest/photographer_portal/newsread`, {
               headers: {
                 Authorization: `Admin ${token}`,
                 'Content-Type': 'application/json',
@@ -247,9 +240,7 @@ const Newsdetails = () => {
   const deleteNews = async (id) => {
     console.log('deleted news:', id);
     try {
-      const responseDelete = await axios.delete(
-        `/api/index.php/rest/photographer_portal/news/${id}`,
-        {
+      const responseDelete = await axios.delete(`${ENV.isProduction ? "https://backend.expressbild.org" : "/api"}/index.php/rest/photographer_portal/news/${id}`, {
           headers: {
             Authorization: `Admin ${token}`,
           },

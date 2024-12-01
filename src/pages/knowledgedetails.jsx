@@ -12,12 +12,7 @@ import { Worker, Viewer } from '@react-pdf-viewer/core';
 import '@react-pdf-viewer/core/lib/styles/index.css'; 
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faCaretLeft,
-  faPenToSquare,
-  faTrashAlt,
-  faFile
-} from '@fortawesome/free-solid-svg-icons';
+import { faCaretLeft, faPenToSquare, faTrashAlt, faFile } from '@fortawesome/free-solid-svg-icons';
 
 import Editpostknowledgebasemodal from '../components/editpostknowledgebasemodal';
 

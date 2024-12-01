@@ -11,6 +11,10 @@ import '../assets/css/global.css';
 
 import useFetchToken from "../assets/js/fetchToken.js"
 
+import ENV from "../../env.js"
+console.log('ENV', ENV);
+console.log('ENV.isProduction', ENV.isProduction);
+
 
 const Recentshot = () => {
   //define states
@@ -38,7 +42,7 @@ const Recentshot = () => {
     //fetching all users
     const fetchUsers = async () => {
       try {
-        const responseUsers = await axios.get('/api/index.php/rest/photographer_portal/users', {
+        const responseUsers = await axios.get(`${ENV.isProduction ? "https://backend.expressbild.org" : "/api"}/index.php/rest/photographer_portal/users`, {
             headers: {
               Authorization: `Admin ${token}`,
               'Content-Type': 'application/json',
@@ -53,7 +57,7 @@ const Recentshot = () => {
     };
     const fetchProjects = async () => {
       try {
-        let response = await axios.get('api/index.php/rest/teamleader/projects', {
+        let response = await axios.get(`${ENV.isProduction ? "https://backend.expressbild.org" : "/api"}/index.php/rest/teamleader/projects`, {
             headers: {
               Authorization: `Admin ${token}`,
               'Content-Type': 'application/json',
@@ -74,7 +78,7 @@ const Recentshot = () => {
     };
     const fetchActivities = async () => {
       try {
-        let responseActivities = await axios.get('api/index.php/rest/photographer_portal/activities', {
+        let responseActivities = await axios.get(`${ENV.isProduction ? "https://backend.expressbild.org" : "/api"}/index.php/rest/photographer_portal/activities`, {
             headers: {
               Authorization: `Admin ${token}`,
               'Content-Type': 'application/json',
@@ -142,7 +146,7 @@ const Recentshot = () => {
   //if search is entered
     const fetchSearchActivities = async () => {
       try {
-        let responseActivities = await axios.get('api/index.php/rest/photographer_portal/activities',{
+        let responseActivities = await axios.get(`${ENV.isProduction ? "https://backend.expressbild.org" : "/api"}/index.php/rest/photographer_portal/activities`,{
             headers: {
               Authorization: `Admin ${token}`,
               'Content-Type': 'application/json',
@@ -223,7 +227,7 @@ const Recentshot = () => {
   // };
 
   // //order by date
-  const orderByDate = () => {
+  const orcdderByDate = () => {
     const sortedActivities = [...latestActivities].sort((a, b) => {
       const dateA = `${a.activity.activity_start}`;
       const dateB = `${b.activity.activity_start}`;
