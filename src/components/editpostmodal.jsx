@@ -10,6 +10,11 @@ import '../assets/css/components.css';
 
 import useFetchToken from "../assets/js/fetchToken.js"
 
+import ENV from "../../env.js"
+console.log('ENV', ENV);
+console.log('ENV.isProduction', ENV.isProduction);
+
+
 
 const Editpostmodal = ({ show, handleClose, handleSubmit, item, refreshData }) => {
   if (!show) return null;
@@ -92,10 +97,7 @@ const Editpostmodal = ({ show, handleClose, handleSubmit, item, refreshData }) =
       // Updating news article 
       try {
         const id = item.news.id;
-        const response = await axios.put(
-          `/api/index.php/rest/photographer_portal/news/${id}`,
-          post,
-          {
+        const response = await axios.put(`${ENV.isProduction ? "https://backend.expressbild.org" : "/api"}/index.php/rest/photographer_portal/news/${id}`, post, {
             headers: {
               Authorization: `Admin ${token}`,
               'Content-Type': 'application/json',
@@ -108,9 +110,8 @@ const Editpostmodal = ({ show, handleClose, handleSubmit, item, refreshData }) =
           // removing all read by data for this post
           try { 
             const id = item.news.id;
-            const response = await axios.delete(
-              `/api/index.php/rest/photographer_portal/newsread/${id}`, {
-                headers: {
+            const response = await axios.delete(`${ENV.isProduction ? "https://backend.expressbild.org" : "/api"}/index.php/rest/photographer_portal/newsread/${id}`, { 
+              headers: {
                   Authorization: `Admin ${token}`,
                   'Content-Type': 'application/json',
                 },
