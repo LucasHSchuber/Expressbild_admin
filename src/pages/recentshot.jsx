@@ -468,6 +468,7 @@ const Recentshot = () => {
                                           : <FontAwesomeIcon className='warningqmsdata-icon' icon={faCircleExclamation}/>}
                                         | 
                                         {a.qmsData === null ? "?"
+                                          : a.qmsData?.admin_statuses === null || a.qmsData?.admin_statuses === "" ? "?"
                                           : a.qmsData?.admin_statuses?.includes("Job OK") ? <FontAwesomeIcon className='okqmsdata-icon' icon={faThumbsUp}/>  
                                           : a.qmsData?.admin_statuses?.includes("Major Error") ? <FontAwesomeIcon className='errorqmsdata-icon' icon={faThumbsDown}/>
                                           : <FontAwesomeIcon className='warningqmsdata-icon' icon={faCircleExclamation}/>}
