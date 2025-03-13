@@ -407,9 +407,6 @@ const updateLangs = async (articleId, langs) => {
 
 
 
-
-
-
 //Route delete
 app.delete('/api/articles/:id', (req, res) => {
   const articleId = parseInt(req.params.id, 10);
@@ -429,6 +426,46 @@ app.delete('/api/articles/:id', (req, res) => {
   });
 });
 
+
+
+
+
+
+// RECENT SHOT - get all qms-data 
+app.get("/api/qms/data", (req, res) => {
+  console.log("GET request received at /api/qms/data");
+
+  const activity_uuids = req.query.activity_uuids;
+  console.log("activity_uuids array: ", activity_uuids)
+
+  if (!activity_uuids || activity_uuids.length === 0) {
+    return res.status(400).json({ error: "Missing activity_uuids parameter." });
+  }
+
+  const uuidArray = activity_uuids.split(","); 
+  console.log("activity_uuids", uuidArray);
+
+  const placeholders = uuidArray.map(() => "?").join(","); 
+  const getQuery = `
+    SELECT q.*, r.activity_uuid, p.statuses AS admin_statuses, p.comments AS admin_comments
+    FROM pms_retouchers_qms q
+    JOIN pms_retouchers r ON q.retoucher_id = r.id
+    LEFT JOIN pms_admin_qms p ON r.activity_uuid = p.activity_uuid
+    WHERE r.activity_uuid IN (${placeholders})
+  `;
+
+  db.query(getQuery, uuidArray, (error, results) => {
+    if (error) {
+      console.error("SQL error:", error);
+      return res.status(500).json({ error: "An error occurred while fetching qms-data." });
+    }
+    if (results.length === 0) {
+      console.log("No qms-data found");
+      return res.status(404).json({ status: 404, error: "Qms-data not found." });
+    }
+    res.status(200).json({ qmsData: results, status: 200 });
+  });
+});
 
 
 
