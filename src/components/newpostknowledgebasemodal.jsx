@@ -201,8 +201,17 @@ const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
   
 
   // set tag
-  const handleSelectChange = (event) => {
-      setSelectedTag(event.target.value);
+  const handleSelectChange = (tag) => {
+      console.log('tag', tag);
+      setErrorTags(false)
+      console.log('tag', tag);
+      if (tag !== "" && !tagsArray.includes(tag)){
+      setTagsArray((prevArray) => [...prevArray, tag]);
+      setNewTag("");
+      }  else {
+        console.log('Tag already exists or is empty');
+      }
+      // setSelectedTag(event.target.value);
   };
   // set new tag
   const handleNewTagChange = (event) => {
@@ -219,6 +228,10 @@ const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
     }
   };
 
+
+  useEffect(() => {
+    console.log('tagsArray', tagsArray);
+  }, [tagsArray]);
 
 
 
@@ -278,7 +291,7 @@ const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
                     id="tag-select"
                     name='tag'
                     value={selectedTag}
-                    onChange={handleSelectChange}
+                    onChange={(e) => handleSelectChange(e.target.value)}
                     required={tagsArray.length === 0}
                 >
                     <option value="">Select a tag</option>
@@ -288,7 +301,7 @@ const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
                         </option>
                     ))}
                 </select>
-                <button disabled={uploading} className='standard add-button' title='Add Tag'  type="button"  onClick={() => addTag(selectedTag)}>  <FontAwesomeIcon icon={faPlus} /> </button>
+                {/* <button disabled={uploading} className='standard add-button' title='Add Tag'  type="button"  onClick={() => addTag(selectedTag)}>  <FontAwesomeIcon icon={faPlus} /> </button> */}
                 <button disabled={uploading} className='standard add-button' title='Create New Tag'  type="button"  onClick={() => setOpenNewTag(!openNewTag)}><FontAwesomeIcon  icon={faPenNib} /></button>
                 {tagsArray.length > 0 && (
                   <div className='ml-2'>
@@ -302,7 +315,7 @@ const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
                   </div>
                 )}
                 {errorTags && (
-                    <h6></h6>
+                    <h6 style={{ color: "red", marginTop: "0.5em" }}>Press '+'-button to add the selected tag</h6>
                 )}
             </div>
             {openNewTag && (

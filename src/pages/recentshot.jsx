@@ -598,7 +598,7 @@ const Recentshot = () => {
                                           </h6>
                                         </div>
                                       </div>
-                                      <hr></hr>
+                                      <hr style={{ border: "1px solid black" }}></hr>
                                       {/* QMS DATA */}
                                       <div className='mt-4'>
                                           <h5 className='mb-3'><b>QMS Retoucher</b></h5>
