@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {faArrowDownWideShort, faCheck, faXmark } from '@fortawesome/free-solid-svg-icons';
+import {faArrowDownWideShort, faCheck, faXmark, faThumbsUp, faThumbsDown, faCircleExclamation, faQuestion } from '@fortawesome/free-solid-svg-icons';
 
 import '../assets/css/main_recentshot.css';
 import '../assets/css/global.css';
@@ -27,6 +27,7 @@ const Recentshot = () => {
   const [dataForControlSheet, setDataForControlSheet] = useState([]);
   const [expandedRow, setExpandedRow] = useState(null);
   const [expandedInnerRow, setExpandedInnerRow] = useState(null);
+  const [activityUuid, setActivityUuid] = useState("");
 
   const [isAscendingPhotographer, setIsAscendingPhotographer] = useState(null);
   const [isAscendingDate, setIsAscendingDate] = useState(null);
@@ -55,27 +56,27 @@ const Recentshot = () => {
         console.error('Error fetching users:', error);
       }
     };
-    const fetchProjects = async () => {
-      try {
-        let response = await axios.get(`${ENV.isProduction ? "https://backend.expressbild.org" : "/api"}/index.php/rest/teamleader/projects`, {
-            headers: {
-              Authorization: `Admin ${token}`,
-              'Content-Type': 'application/json',
-            },
-          }
-        );
-        console.log('response from "/projects"', response);
-        if (response && response.data) {
-          console.log('Fetched projects:', response.data.result);
-          return response.data; // Return the fetched data
-        } else {
-          console.error('Empty response received');
-          return null;
-        }
-      } catch (error) {
-        console.error('Error fetching projects:', error.message);
-      }
-    };
+    // const fetchProjects = async () => {
+    //   try {
+    //     let response = await axios.get(`${ENV.isProduction ? "https://backend.expressbild.org" : "/api"}/index.php/rest/teamleader/projects`, {
+    //         headers: {
+    //           Authorization: `Admin ${token}`,
+    //           'Content-Type': 'application/json',
+    //         },
+    //       }
+    //     );
+    //     console.log('response from "/projects"', response);
+    //     if (response && response.data) {
+    //       console.log('Fetched projects:', response.data.result);
+    //       return response.data; 
+    //     } else {
+    //       console.error('Empty response received');
+    //       return null;
+    //     }
+    //   } catch (error) {
+    //     console.error('Error fetching projects:', error.message);
+    //   }
+    // };
     const fetchActivities = async () => {
       try {
         let responseActivities = await axios.get(`${ENV.isProduction ? "https://backend.expressbild.org" : "/api"}/index.php/rest/photographer_portal/activities`, {
@@ -104,7 +105,7 @@ const Recentshot = () => {
       }
     };
     fetchUsers();
-    fetchProjects();
+    // fetchProjects();
     fetchActivities();
   };
   useEffect(() => {
@@ -115,33 +116,100 @@ const Recentshot = () => {
 
 
 
-  
-  const getLatestActivities = (data) => {
-    console.log(data);
-    const latestActivities = {};
+  // Method to fetch qms-data
+  const fetchQmsData = async (activityUuids, allActivitiesByUser) => {
+    if (!activityUuids || activityUuids.length === 0) {
+      console.warn("Activity UUIDs are missing. Cannot fetch qms-data.");
+      return;
+    }
+    const uuidQueryString = activityUuids.join(",");
 
-    data.forEach((activity) => {
-      const photographerId = activity.photographer.id;
-      const activityStart = new Date(activity.activity.activity_start);
+    try {
+      const response = await fetch(`${ENV.API_URL}api/qms/data?activity_uuids=${uuidQueryString}`, {
+          method: 'GET',
+          headers: {
+              Authorization: `Admin ${token}`,
+              // 'Content-Type': 'application/json',
+          },
+      });
 
-      if (
-        !latestActivities[photographerId] ||
-        activityStart >
-          new Date(latestActivities[photographerId].activity.activity_start)
-      ) {
-        latestActivities[photographerId] = activity;
+      const data = await response.json(); 
+      console.log('Parsed json:', data);
+
+      if (!response.ok) {
+        console.error(`Error: Received status ${response.status}`);
+        createFinalArray(null, allActivitiesByUser);
+        return;
       }
-    });
+      if (data.qmsData && data.qmsData.length > 0) {
+        console.log('Successfully fetched qms-data from database:', data.qmsData);
+        createFinalArray(data.qmsData, allActivitiesByUser)
+      } else {
+        console.log('Qms-data not found for activityUuid');
+        createFinalArray(null, allActivitiesByUser);
+      }
+    } catch (error) {
+      console.error('Error fetching qms-data:', error);
+      createFinalArray(null, allActivitiesByUser);
 
-    return Object.values(latestActivities);
+    }
+  }
+
+  // create final array
+  const createFinalArray = (qmsData, allActivitiesByUser) => {
+    console.log('qmsData', qmsData);
+    console.log('allActivitiesByUser', allActivitiesByUser);
+  
+    if (!qmsData || !Array.isArray(qmsData)) {
+      allActivitiesByUser.forEach(activity => {
+        if (activity.project) {
+          activity.qmsData = null;
+        }
+      });
+    } else {
+      allActivitiesByUser.forEach(activity => {
+        if (!activity.project) return;
+  
+        const projects = Array.isArray(activity.project) ? activity.project : [activity.project];
+        const matchingQmsData = qmsData.find(qms => 
+          projects.some(proj => qms.activity_uuid === proj.activity_uuid)
+        );
+        activity.qmsData = matchingQmsData || null;
+      });
+    }
+  
+    console.log('Updated allActivitiesByUser:', allActivitiesByUser);
+    setAllActivitiesByUser(allActivitiesByUser);
+  };
+  
+
+
+  
+
+
+
+  const getLatestActivities = (data) => {
+      console.log(data);
+      const latestActivities = {};
+
+      data.forEach((activity) => {
+        const photographerId = activity.photographer.id;
+        const activityStart = new Date(activity.activity.activity_start);
+
+        if (
+          !latestActivities[photographerId] ||
+          activityStart >
+            new Date(latestActivities[photographerId].activity.activity_start)
+        ) {
+          latestActivities[photographerId] = activity;
+        }
+      });
+
+      return Object.values(latestActivities);
   };
 
 
 
-  const handleSearchChange = (e) => {
-    console.log(e.target.value);
-    setSearchString(e.target.value.toLowerCase());
-  };
 
   //if search is entered
     const fetchSearchActivities = async () => {
@@ -187,80 +255,80 @@ const Recentshot = () => {
     };
 
     useEffect(() => {
-      if (isValid) {
-        fetchSearchActivities();
-      }
+        if (isValid) {
+          fetchSearchActivities();
+        }
     }, [searchString, selectedCountry]);
-
 
 
   //handleChangeCountry
   const handleChangeCountry = (e) => {
-    console.log(e.target.value);
-    setSelectedCountry(e.target.value);
+      console.log(e.target.value);
+      setSelectedCountry(e.target.value);
   };
 
   //order by photographer
   const orderByPhotographer = () => {
-    const sortedActivities = [...latestActivities].sort((a, b) => {
-      const nameA = `${a.photographer.firstname.toLowerCase()} ${a.photographer.surname.toLowerCase()}`;
-      const nameB = `${b.photographer.firstname.toLowerCase()} ${b.photographer.surname.toLowerCase()}`;
-      if (nameA < nameB) return isAscendingPhotographer ? -1 : 1;
-      if (nameA > nameB) return isAscendingPhotographer ? 1 : -1;
-      return 0;
-    });
-    setIsAscendingPhotographer(!isAscendingPhotographer);
-    setLatestActivities(sortedActivities);
+      const sortedActivities = [...latestActivities].sort((a, b) => {
+        const nameA = `${a.photographer.firstname.toLowerCase()} ${a.photographer.surname.toLowerCase()}`;
+        const nameB = `${b.photographer.firstname.toLowerCase()} ${b.photographer.surname.toLowerCase()}`;
+        if (nameA < nameB) return isAscendingPhotographer ? -1 : 1;
+        if (nameA > nameB) return isAscendingPhotographer ? 1 : -1;
+        return 0;
+      });
+      setIsAscendingPhotographer(!isAscendingPhotographer);
+      setLatestActivities(sortedActivities);
   };
 
-  // //order by activity name
-  // const orderByActivity = () => {
-  //   const sortedActivities = [...latestActivities].sort((a, b) => {
-  //     const aA = `${a.activity.project_name}`;
-  //     const aB = `${b.activity.project_name}`;
-  //     if (aA < aB) return isAscendingActivity ? -1 : 1;
-  //     if (aA > aB) return isAscendingActivity ? 1 : -1;
-  //     return 0;
-  //   });
-  //   setIsAscendingActivity(!isAscendingActivity);
-  //   setLatestActivities(sortedActivities);
-  // };
 
   // //order by date
-  const orcdderByDate = () => {
-    const sortedActivities = [...latestActivities].sort((a, b) => {
-      const dateA = `${a.activity.activity_start}`;
-      const dateB = `${b.activity.activity_start}`;
-      if (dateA < dateB) return isAscendingDate ? -1 : 1;
-      if (dateA > dateB) return isAscendingDate ? 1 : -1;
-      return 0;
-    });
-    setIsAscendingDate(!isAscendingDate);
-    setLatestActivities(sortedActivities);
+  const orderByDate = () => {
+      const sortedActivities = [...latestActivities].sort((a, b) => {
+        const dateA = `${a.activity.activity_start}`;
+        const dateB = `${b.activity.activity_start}`;
+        if (dateA < dateB) return isAscendingDate ? -1 : 1;
+        if (dateA > dateB) return isAscendingDate ? 1 : -1;
+        return 0;
+      });
+      setIsAscendingDate(!isAscendingDate);
+      setLatestActivities(sortedActivities);
   };
 
   //handle table row click
-  const handleRowClick = (photographerId) => {
-    setExpandedRow(expandedRow === photographerId ? null : photographerId);
-    const _allActivitiesByUser = allActivities.filter(
-      (r) => r.photographer.id === photographerId
-    );
-    console.log('All activities by user:', _allActivitiesByUser);
-    setDataForControlSheet('');
-    setExpandedInnerRow('');
-    setAllActivitiesByUser(_allActivitiesByUser);
+  const handleRowClick = (photographerId, activity_id) => {
+      setExpandedRow(expandedRow === photographerId ? null : photographerId);
+      const _allActivitiesByUser = allActivities.filter((r) => r.photographer.id === photographerId);
+      console.log('All activities by user:', _allActivitiesByUser);
+      const uuidArray = createUuidArray(_allActivitiesByUser);
+      fetchQmsData(uuidArray, _allActivitiesByUser)
+      setDataForControlSheet('');
+      setExpandedInnerRow('');
+      setActivityUuid(activity_id);
   };
+
+  const createUuidArray = (_allActivitiesByUser) => {
+      const projects =_allActivitiesByUser.map(item => item.project)
+      const uuids = projects.flatMap(item => item.activity_uuid)
+      return uuids;
+  }
 
   //handle inner table inner row click
   const handleInnerRowClick = (activity_id) => {
-    console.log('activity_id', activity_id);
-    setExpandedInnerRow(expandedInnerRow === activity_id ? null : activity_id);
+      console.log('activity_id', activity_id);
+      setExpandedInnerRow(expandedInnerRow === activity_id ? null : activity_id);
   };
 
   const handleChangeControlSheet = (e) => {
-    console.log(e);
-    setDataForControlSheet(e);
+      console.log(e);
+      setDataForControlSheet(e);
   };
+
+
+  const handleSearchChange = (e) => {
+      console.log(e.target.value);
+      setSearchString(e.target.value.toLowerCase());
+  };
+
 
 
 
@@ -274,7 +342,7 @@ const Recentshot = () => {
         </h5>
         <button 
             onClick={() => window.location.reload()} 
-            style={{ padding: '10px 20px',backgroundColor: '#007bff',color: '#fff',border: 'none',borderRadius: '5px',cursor: 'pointer'}}
+            style={{ padding: '10px 20px',backgroundColor: '#007bff',color: '#fff',border: 'none',borderRadius: '5px', cursor: 'pointer'}}
         >
             Refresh Page
         </button>
@@ -345,11 +413,11 @@ const Recentshot = () => {
         </thead>
         <tbody>
           {latestActivities && latestActivities.length > 0 ? (
-            latestActivities.map((item) => (
-              <React.Fragment key={item.photographer.id}>
+            latestActivities.map((item, index) => (
+              <React.Fragment key={`${item.photographer.id + index}-photographer-details`}>
                 <tr
                   className={`outer-tr ${item.photographer.id === expandedRow ? 'selected-tr' : ''}`}
-                  onClick={() => handleRowClick(item.photographer.id)}
+                  onClick={() => handleRowClick(item.photographer.id, item.project.activity_uuid)}
                 >
                   <td>
                     {item.photographer.firstname} {item.photographer.surname}
@@ -359,27 +427,25 @@ const Recentshot = () => {
                 </tr>
                 {/* opening when clicking on a tr in table */}
                 {expandedRow === item.photographer.id && (
-                  <tr key={`${item.photographer.id}-details`}>
+                  <tr key={`${item.photographer.id + index}`}>
                     <td colSpan="3" className="expanded-inner-table">
                       <div className="flex-container">
                         <div className="flex-item left-inner-table">
-                          {/* <h6 className='mt-3' style={{ fontSize: "1.3em" }}><b>All activites by {item.photographer.firstname} {item.photographer.surname}:</b> <br></br>
-                            <em>Click on an activity to open control sheet</em>
-                          </h6> */}
                           <table className="control-sheet-table">
                             <thead>
                               <tr>
                                 <th>Activity</th>
                                 <th>Date</th>
+                                <th title='Portrait/Group/Admin'>QMS</th>
                               </tr>
                             </thead>
                             <tbody>
                               {allActivitiesByUser.length > 0 ? (
                                 allActivitiesByUser
                                   .sort((a, b) => new Date(b.activity.activity_start) - new Date(a.activity.activity_start))
-                                  .map((a) => (
+                                  .map((a, index) => (
                                   <tr
-                                    key={a.activity.project_uuid + a.project.activity_uuid}
+                                    key={`${a.activity.project_uuid + a.project.activity_uuid}-data+${index}`}
                                     className={`expanded-inner-tr ${a.project.activity_uuid === expandedInnerRow ? "selected-inner-tr" : "" }`}
                                     onClick={() => {handleChangeControlSheet(a); handleInnerRowClick(a.project.activity_uuid)}}
                                   >
@@ -389,6 +455,22 @@ const Recentshot = () => {
                                     </td>
                                     <td>
                                       {a.activity.activity_start.substring(0, 10)}
+                                    </td>
+                                    <td className='d-flex'>
+                                        {a.qmsData === null ? "?"
+                                          : a.qmsData.portraits_statuses.includes("Job OK") ?  <FontAwesomeIcon className='okqmsdata-icon' icon={faThumbsUp}/> 
+                                          : a.qmsData.portraits_statuses.includes("Major Error") ? <FontAwesomeIcon className='errorqmsdata-icon' icon={faThumbsDown}/>  
+                                          : <FontAwesomeIcon className='warningqmsdata-icon' icon={faCircleExclamation}/>}
+                                        |
+                                        {a.qmsData === null ? "?" 
+                                          : a.qmsData.grouppicture_statuses.includes("Job OK") ? <FontAwesomeIcon className='okqmsdata-icon' icon={faThumbsUp}/>  
+                                          : a.qmsData.grouppicture_statuses.includes("Major Error") ? <FontAwesomeIcon className='errorqmsdata-icon' icon={faThumbsDown}/>
+                                          : <FontAwesomeIcon className='warningqmsdata-icon' icon={faCircleExclamation}/>}
+                                        | 
+                                        {a.qmsData === null ? "?"
+                                          : a.qmsData?.admin_statuses?.includes("Job OK") ? <FontAwesomeIcon className='okqmsdata-icon' icon={faThumbsUp}/>  
+                                          : a.qmsData?.admin_statuses?.includes("Major Error") ? <FontAwesomeIcon className='errorqmsdata-icon' icon={faThumbsDown}/>
+                                          : <FontAwesomeIcon className='warningqmsdata-icon' icon={faCircleExclamation}/>}
                                     </td>
                                   </tr>
                                 ))
@@ -403,16 +485,12 @@ const Recentshot = () => {
 
                         {/* <h6>Control sheet: </h6> */}
                         {dataForControlSheet && (
-                          <div
-                            className={`flex-item right-inner-table ${dataForControlSheet ? 'show-right-inner-table' : ''}`}
-                          >
+                          <div className={`flex-item right-inner-table ${dataForControlSheet ? 'show-right-inner-table' : ''}`}>
                             <div>
-                              <tr
-                                key={`${dataForControlSheet?.photographer?.id}-details`}
-                                 className='control-sheet-box'
-                              >
+                              <tr key={`${dataForControlSheet?.photographer?.id}-details`} className='control-sheet-box'>
                                 <td colSpan="4" className="inner-table-td">
                                   <div style={{ paddingTop: '1.5em' }}>
+                                  <h5 className='mb-3'><b>Control Sheet</b></h5>
                                     <div className="mb-4  control-sheet-headers">
                                       <h6>
                                         <strong>Activity name: </strong>
@@ -453,81 +531,88 @@ const Recentshot = () => {
                                           target="_blank"
                                           style={{ textDecoration: 'underline', color: 'blue', cursor: 'pointer',
                                           }}
-                                        >
-                                          Click here to navigate to checkpoint
-                                        </a>
+                                        > Click here to navigate to checkpoint</a>
                                       </h6>
                                     </div>
-                                    <table className="control-sheet-table">
-                                      <thead>
-                                        <tr>
-                                          <th>Team/class name</th>
-                                          <th>Portrait</th>
-                                          <th>Group</th>
-                                          <th>Calendar</th>
-                                        </tr>
-                                      </thead>
-                                      <tbody>
-                                        {dataForControlSheet?.teams?.map(
-                                          (team) => (
-                                            <tr key={team.id}>
-                                              <td>{team.team}</td>
-                                              <td>
-                                                {team.took_portrait === true ? (
-                                                  <FontAwesomeIcon icon={faCheck} style={{ color: 'green' }}
-                                                  />
-                                                ) : (
-                                                  <FontAwesomeIcon icon={faXmark} style={{ color: 'red' }}
-                                                  />
-                                                )}
-                                              </td>
-                                              <td>
-                                                {team.took_group === true ? (
-                                                  <FontAwesomeIcon icon={faCheck} style={{ color: 'green' }}
-                                                  />
-                                                ) : (
-                                                  <FontAwesomeIcon icon={faXmark} style={{ color: 'red' }}
-                                                  />
-                                                )}
-                                              </td>
-                                              <td>
-                                              {team.num_calendars > 0 ? (
-                                                  <FontAwesomeIcon icon={faCheck} style={{ color: 'green' }}
-                                                  />
-                                                ) : (
-                                                  <FontAwesomeIcon icon={faXmark} style={{ color: 'red' }}
-                                                  />
-                                                )}
-                                                {/* {" "}{team.num_calendars}/{team.num_players} */}
-                                              </td>
-                                            </tr>
-                                          )
-                                        )}
-                                      </tbody>
-                                    </table>
-                                    <div className="mt-4 control-sheet-headers">
-                                      <div className="mb-2">
-                                        <h6>
-                                          <strong>Anomaly report:</strong>{' '}
-                                        </h6>
-                                        <h6>
-                                          {dataForControlSheet?.reports.length > 0 ? ( dataForControlSheet?.reports[0] ?.text
-                                          ) : (
-                                            <em>Empty</em>
+                                      <table className="control-sheet-table">
+                                        <thead>
+                                          <tr>
+                                            <th>Team/class name</th>
+                                            <th>Portrait</th>
+                                            <th>Group</th>
+                                            <th>Calendar</th>
+                                          </tr>
+                                        </thead>
+                                        <tbody>
+                                          {dataForControlSheet?.teams?.map(
+                                            (team) => (
+                                              <tr key={team.id}>
+                                                <td>{team.team}</td>
+                                                <td>
+                                                  {team.took_portrait === true ? (<FontAwesomeIcon icon={faCheck} style={{ color: 'green' }}/>
+                                                  ) : (
+                                                    <FontAwesomeIcon icon={faXmark} style={{ color: 'red' }}/>
+                                                  )}
+                                                </td>
+                                                <td>
+                                                  {team.took_group === true ? (<FontAwesomeIcon icon={faCheck} style={{ color: 'green' }}/>
+                                                  ) : (
+                                                    <FontAwesomeIcon icon={faXmark} style={{ color: 'red' }}/>
+                                                  )}
+                                                </td>
+                                                <td>
+                                                {team.num_calendars > 0 ? (
+                                                    <FontAwesomeIcon icon={faCheck} style={{ color: 'green' }}/>
+                                                  ) : (
+                                                    <FontAwesomeIcon icon={faXmark} style={{ color: 'red' }}/>
+                                                  )}
+                                                </td>
+                                              </tr>
+                                            )
                                           )}
-                                        </h6>
+                                        </tbody>
+                                      </table>
+                                      <hr></hr>
+                                      <div className="mt-3 mb-5 control-sheet-headers">
+                                        <div className="mb-2">
+                                          <h6>
+                                            <strong>Anomaly report:</strong>{' '}
+                                          </h6>
+                                          <h6>
+                                            {dataForControlSheet?.reports.length > 0 ? ( dataForControlSheet?.reports[0] ?.text
+                                            ) : (
+                                              <em>Empty</em>
+                                            )}
+                                          </h6>
+                                        </div>
+                                        <div>
+                                          <h6>
+                                            <strong>Merged teams:</strong>{' '}
+                                          </h6>
+                                          <h6>
+                                            {dataForControlSheet?.project ?.merged_teams ? ( dataForControlSheet?.project ?.merged_teams
+                                            ) : (
+                                              <em>Empty</em>
+                                            )}
+                                          </h6>
+                                        </div>
                                       </div>
-                                      <div>
-                                        <h6>
-                                          <strong>Merged teams:</strong>{' '}
-                                        </h6>
-                                        <h6>
-                                          {dataForControlSheet?.project ?.merged_teams ? ( dataForControlSheet?.project ?.merged_teams
-                                          ) : (
-                                            <em>Empty</em>
-                                          )}
-                                        </h6>
-                                      </div>
+                                      <hr></hr>
+                                      {/* QMS DATA */}
+                                      <div className='mt-4'>
+                                          <h5 className='mb-3'><b>QMS Retoucher</b></h5>
+                                          <div className='mb-4'>
+                                              <h6><b>Portrait Statuses:</b> {dataForControlSheet?.qmsData?.portraits_statuses}</h6>
+                                              <h6><b>Portrait Comment:</b> <em>{dataForControlSheet?.qmsData?.portraits_comments}</em></h6>
+                                              <h6><b>Group Statuses:</b> {dataForControlSheet?.qmsData?.grouppicture_statuses}</h6>
+                                              <h6><b>Group Comment:</b> <em>{dataForControlSheet?.qmsData?.grouppicture_comments}</em></h6>
+                                          </div>
+
+                                          <h5 className='mb-3'><b>QMS admin</b></h5>
+                                          <div className='mb-4'>
+                                              <h6><b>Admin Statuses:</b> {dataForControlSheet?.qmsData?.admin_statuses}</h6>
+                                              <h6><b>Admin Comment:</b> <em>{dataForControlSheet?.qmsData?.admin_comments}</em></h6>
+                                          </div>
                                     </div>
                                   </div>
                                 </td>
@@ -554,124 +639,5 @@ const Recentshot = () => {
     </div>
   );
 };
-
-{
-  /* <tr key={`${item.photographer.id}-details`}>
-  <td colSpan="4" className="expanded-inner-table">
-    <div>
-      <div className="mb-4 control-sheet-headers">
-        <h6>
-          <strong>Activity Name:</strong>{' '}
-          {item.activity.project_name}
-        </h6>
-        <h6>
-          <strong>Activity date:</strong>{' '}
-          {item &&
-            item.activity.activity_start.substring(0, 10)}
-        </h6>
-        <h6>
-          <strong>Photographer:</strong>{' '}
-          {item.photographer.firstname}{' '}
-          {item.photographer.surname}
-        </h6>
-        <h6>
-          <strong>Check point:</strong>{' '}
-          <a
-            href={`https://${
-              item.photographer.lang === 'SE'
-                ? 'shop.expressbild.se'
-                : item.photographer.lang === 'FI'
-                  ? 'shop.expresskuva.fi'
-                  : item.photographer.lang === 'DK'
-                    ? 'shop.billedexpressen.dk'
-                    : item.photographer.lang === 'NO'
-                      ? 'shop.fotoexpressen.no'
-                      : item.photographer.lang === 'DE'
-                        ? 'shop.bildexpressen.de'
-                        : ''
-            }/admin/prophoto/jobs/report.php?jobid=${item.activity.project_uuid}&activity=#/tab/8?extra=0&extra2=1`}
-            target="_blank"
-            style={{
-              textDecoration: 'underline',
-              color: 'blue',
-              cursor: 'pointer',
-            }}
-          >
-            Click here to navigate checkpoint
-          </a>{' '}
-        </h6>
-      </div>
-      <table className="control-sheet-table">
-        <thead>
-          <tr>
-            <th>Team name:</th>
-            <th>Portrait:</th>
-            <th>Group:</th>
-          </tr>
-        </thead>
-        <tbody>
-          {item.teams.map((team) => (
-            <tr key={team.id}>
-              <td>{team.team}</td>
-              <td>
-                {team.took_portrait === true ? (
-                  <FontAwesomeIcon
-                    icon={faCheck}
-                    style={{ color: 'green' }}
-                  />
-                ) : (
-                  <FontAwesomeIcon
-                    icon={faXmark}
-                    style={{ color: 'red' }}
-                  />
-                )}
-              </td>
-              <td>
-                {team.took_group === true ? (
-                  <FontAwesomeIcon
-                    icon={faCheck}
-                    style={{ color: 'green' }}
-                  />
-                ) : (
-                  <FontAwesomeIcon
-                    icon={faXmark}
-                    style={{ color: 'red' }}
-                  />
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <div className="mt-4 control-sheet-headers">
-        <div className="mb-2">
-          <h6>
-            <strong>Anomaly report:</strong>{' '}
-          </h6>
-          <h6>
-            {item.report ? (
-              item.reports[0].text
-            ) : (
-              <em>Empty</em>
-            )}
-          </h6>
-        </div>
-        <div>
-          <h6>
-            <strong>Merged teams:</strong>{' '}
-          </h6>
-          <h6>
-            {item.project.merged_teams ? (
-              item.project.merged_teams
-            ) : (
-              <em>Empty</em>
-            )}
-          </h6>
-        </div>
-      </div>
-    </div>
-  </td>
-</tr> */
-}
 
 export default Recentshot;

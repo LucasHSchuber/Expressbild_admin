@@ -32,16 +32,7 @@
   font-size: 1.2em !important;
 }
 
-.control-sheet-table tr th{
-  background-color: rgb(249, 249, 249) !important;
-}
-.control-sheet-table {
-  margin-top: 20px;
-  font-size: 1.2em !important;
-}
-.control-sheet-table tbody tr td {
-  padding: 6px 15px;
-}
+
 
 .outer-tr {
   font-size: 1.2em !important;
@@ -125,11 +116,19 @@
   background-color: #f2f2f2;
 }
 
-.control-sheet-table th,
-.control-sheet-table td {
-  padding: 8px;
-  width: 75%;
+.control-sheet-table tr th{
+  background-color: rgb(249, 249, 249) !important;
+  cursor: default;
+  /* padding: 7px 20px !important; */
 }
+.control-sheet-table tr td {
+  padding: 7px 12px 7px 14px !important;
+}
+.control-sheet-table {
+  margin-top: 20px;
+  font-size: 1.2em !important;
+}
+
 
 
 /* buttons */
@@ -146,4 +145,18 @@
 
 .sort-button:hover {
   background-color: #efefef !important;
+}
+
+
+.noqmsdata-icon{
+  color: grey;
+}
+.warningqmsdata-icon{
+  color: rgb(234, 195, 0);
+}
+.okqmsdata-icon{
+  color: rgb(0, 212, 0);
+}
+.errorqmsdata-icon{
+  color: rgb(255, 0, 0);
 }
