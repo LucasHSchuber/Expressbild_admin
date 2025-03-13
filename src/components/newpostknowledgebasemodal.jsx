@@ -28,6 +28,7 @@ const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
   const [file, setFile] = useState([]);
   const [tagsArray, setTagsArray] = useState([]);
   const [errorBoarderLang, setErrorBoarderLang] = useState(false);
+  const [errorTags, setErrorTags] = useState(false);
 
   const [openNewTag, setOpenNewTag] = useState(false);
   const [selectedTag, setSelectedTag] = useState('');
@@ -61,6 +62,7 @@ const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
     } 
     if (tags === '') {
       console.log('Choose at least one tag');
+      setErrorTags(true);
       return;
     } 
     if (tagsArray.length === 0) {
@@ -298,6 +300,9 @@ const Newpostmodal = ({ show, handleClose, refreshData, tags }) => {
                       </div>
                     ))}
                   </div>
+                )}
+                {errorTags && (
+                    <h6></h6>
                 )}
             </div>
             {openNewTag && (
