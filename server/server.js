@@ -2,7 +2,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import mysql from 'mysql';
 import cors from 'cors';
-import dbConfig from './dbConfig.js'; 
+import dbConfig from './DbConfig.js'; 
 import multer from 'multer';
 import zlib from 'zlib';
 
@@ -11,13 +11,13 @@ import zlib from 'zlib';
 const storage = multer.memoryStorage();
 const upload = multer({
   storage,
-  limits: { fileSize: 250 * 1024 * 1024 }, // Limit to 250 MB
+  limits: { fileSize: 250 * 1024 * 1024 },
 });
 const app = express();
 const port = 3003;
 
 
-app.use(express.json({ limit: '250mb' })); // Adjust as needed
+app.use(express.json({ limit: '250mb' })); 
 app.use(express.urlencoded({ limit: '250mb', extended: true }));
 
 

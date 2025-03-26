@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios'; // Import axios
+import axios from 'axios'; 
 
 // Import env var
 import ENV from "../../../env.js";
@@ -33,7 +33,6 @@ const useFetchToken = () => {
           return;
         }
       }
-      // Set the token in state and validate
       setToken(tokenToValidate);
       validateToken(tokenToValidate);
     };
