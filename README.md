@@ -2,7 +2,7 @@
 - Lucas Schuber
 - Expressbild_admin repo
 
-## Admin for news & Recent shot & Admin for knowledge base
+## Admin for news & Recent shot & Admin for Knowledge base
 
 ## Express-Bild
 
